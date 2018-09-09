@@ -3,8 +3,13 @@ package org.oggio88.worth.serialization.json;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.oggio88.worth.antlr.JSONLexer;
+import org.oggio88.worth.antlr.JSONListenerImpl;
 import org.oggio88.worth.xface.Value;
 import org.tukaani.xz.XZInputStream;
 
@@ -65,7 +70,7 @@ public class PerformanceTest {
     @Test
     @SneakyThrows
     public void loopTest() {
-        double jacksonTime, worthTime;
+        double jacksonTime, worthTime, antlrTime;
         final int loops = 100;
         Chronometer chr = new Chronometer();
         {
@@ -85,6 +90,21 @@ public class PerformanceTest {
             worthTime = chr.stop(Chronometer.TimeUnit.MILLISECOND);
             System.out.printf("Worth time:   %8s msec\n", String.format("%.3f", worthTime));
         }
+        {
+            chr.reset();
+            for (int i = 0; i < loops; i++) {
+                ANTLRInputStream inputStream = new ANTLRInputStream(
+                        getClass().getResourceAsStream("/wordpress.json"));
+                JSONLexer lexer = new JSONLexer(inputStream);
+                CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
+                org.oggio88.worth.antlr.JSONParser parser = new org.oggio88.worth.antlr.JSONParser(commonTokenStream);
+                JSONListenerImpl listener = new JSONListenerImpl();
+                ParseTreeWalker walker = new ParseTreeWalker();
+                walker.walk(listener, parser.json());
+            }
+            antlrTime = chr.stop(Chronometer.TimeUnit.MILLISECOND);
+            System.out.printf("Antlr time:   %8s msec\n", String.format("%.3f", antlrTime));
+        }
     }
 
     @Test
@@ -92,7 +112,7 @@ public class PerformanceTest {
     @SneakyThrows
     public void hugeJSONTest() {
         byte[] testData = extractTestData();
-        double jacksonTime, worthTime;
+        double jacksonTime, worthTime, antlrTime;
         Chronometer chr = new Chronometer();
         {
             chr.reset();
@@ -106,6 +126,18 @@ public class PerformanceTest {
             Value value = new JSONParser().parse(new ByteArrayInputStream(testData));
             worthTime = chr.stop(Chronometer.TimeUnit.SECOND);
             System.out.printf("Worth time:   %8s sec\n", String.format("%.3f", worthTime));
+        }
+        {
+            chr.reset();
+            ANTLRInputStream inputStream = new ANTLRInputStream(new ByteArrayInputStream(testData));
+            JSONLexer lexer = new JSONLexer(inputStream);
+            CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
+            org.oggio88.worth.antlr.JSONParser parser = new org.oggio88.worth.antlr.JSONParser(commonTokenStream);
+            JSONListenerImpl listener = new JSONListenerImpl();
+            ParseTreeWalker walker = new ParseTreeWalker();
+            walker.walk(listener, parser.json());
+            antlrTime = chr.stop(Chronometer.TimeUnit.SECOND);
+            System.out.printf("Antlr time:   %8s sec\n", String.format("%.3f", antlrTime));
         }
     }
 }

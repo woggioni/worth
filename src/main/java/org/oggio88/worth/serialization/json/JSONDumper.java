@@ -23,6 +23,37 @@ public class JSONDumper extends ValueDumper {
 
     protected Writer writer;
 
+    private String escapeString(String value){
+        StringBuilder sb = new StringBuilder();
+        for (char c : value.toCharArray()) {
+            switch (c) {
+                case '"':
+                    sb.append("\\\"");
+                    break;
+                case '\r':
+                    sb.append("\\r");
+                    break;
+                case '\n':
+                    sb.append("\\n");
+                    break;
+                case '\t':
+                    sb.append("\\t");
+                    break;
+                case '\\':
+                    sb.append("\\\\");
+                    break;
+                default: {
+                    if (c < 128)
+                        sb.append(c);
+                    else {
+                        sb.append("\\u").append(String.format("%04X", (int) c));
+                    }
+                }
+            }
+        }
+        return sb.toString();
+    }
+
     @Override
     public void dump(Value value, OutputStream stream) {
         dump(value, new OutputStreamWriter(stream));
@@ -121,40 +152,13 @@ public class JSONDumper extends ValueDumper {
     @Override
     @SneakyThrows
     protected void objectKey(String key) {
-        this.writer.write("\"" + key + "\"");
+        this.writer.write("\"" + escapeString(key) + "\"");
     }
 
     @Override
     @SneakyThrows
     protected void stringValue(String value) {
-        StringBuilder sb = new StringBuilder();
-        for (char c : value.toCharArray()) {
-            switch (c) {
-                case '"':
-                    sb.append("\\\"");
-                    break;
-                case '\r':
-                    sb.append("\\r");
-                    break;
-                case '\n':
-                    sb.append("\\n");
-                    break;
-                case '\t':
-                    sb.append("\\t");
-                    break;
-                case '\\':
-                    sb.append("\\\\");
-                    break;
-                default: {
-                    if (c < 128)
-                        sb.append(c);
-                    else {
-                        sb.append("\\u").append(String.format("%04X", (int) c));
-                    }
-                }
-            }
-        }
-        this.writer.write("\"" + sb.toString() + "\"");
+        this.writer.write("\"" + escapeString(value) + "\"");
     }
 
     @Override
