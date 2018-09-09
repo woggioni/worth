@@ -1,7 +1,10 @@
 package org.oggio88.worth.utils;
 
 import lombok.SneakyThrows;
+import org.oggio88.worth.buffer.CircularBuffer;
+import org.oggio88.worth.exception.ParseException;
 
+import java.io.InputStream;
 import java.util.concurrent.Callable;
 
 public class WorthUtils {

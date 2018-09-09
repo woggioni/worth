@@ -27,16 +27,26 @@ value
    | NUMBER
    | obj
    | array
-   | 'true'
-   | 'false'
-   | 'null'
+   | TRUE
+   | FALSE
+   | NULL
    ;
 
+TRUE
+   : 'true'
+   ;
+
+FALSE
+   : 'false'
+   ;
+
+NULL
+   : 'null'
+   ;
 
 STRING
    : '"' (ESC | SAFECODEPOINT)* '"'
    ;
-
 
 fragment ESC
    : '\\' (["\\/bfnrt] | UNICODE)
