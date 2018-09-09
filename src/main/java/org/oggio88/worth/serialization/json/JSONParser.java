@@ -1,7 +1,7 @@
 package org.oggio88.worth.serialization.json;
 
 import lombok.SneakyThrows;
-import org.oggio88.worth.buffer.CircularBuffer;
+import org.oggio88.worth.buffer.LookAheadTextInputStream;
 import org.oggio88.worth.exception.IOException;
 import org.oggio88.worth.exception.NotImplementedException;
 import org.oggio88.worth.exception.ParseException;
@@ -27,10 +27,10 @@ public class JSONParser extends ValueParser {
         return c >= '0' && c <= '9' || c == '+' || c == '-' || c == '.' || c == 'e';
     }
 
-    private static int parseHex(CircularBuffer circularBuffer) {
+    private static int parseHex(LookAheadTextInputStream stream) {
         int result = 0;
         while (true) {
-            int c = circularBuffer.next();
+            int c = stream.getCurrentByte();
             if (c >= '0' && c <= '9') {
                 result = result << 4;
                 result += (c - '0');
@@ -41,23 +41,25 @@ public class JSONParser extends ValueParser {
                 result = result << 4;
                 result += 10 + (c - 'A');
             } else {
-                circularBuffer.prev();
                 break;
             }
+            stream.read();
         }
         return result;
     }
 
-    private final void parseNumber(CircularBuffer circularBuffer) {
+    private final void parseNumber(LookAheadTextInputStream stream) {
         StringBuilder sb = new StringBuilder();
         while (true) {
-            int b = circularBuffer.next();
-            if (isDecimal(b)) {
+            int b = stream.getCurrentByte();
+            if (b < 0) {
+                break;
+            } else if (isDecimal(b)) {
                 sb.appendCodePoint(b);
             } else {
-                circularBuffer.prev();
                 break;
             }
+            stream.read();
         }
         String text = sb.toString();
         if (text.indexOf('.') > 0) {
@@ -67,15 +69,16 @@ public class JSONParser extends ValueParser {
         }
     }
 
-    private final String readString(CircularBuffer circularBuffer) {
+    private final String readString(LookAheadTextInputStream stream) {
         StringBuilder sb = new StringBuilder();
         boolean escape = false;
+        boolean start = false;
         while (true) {
-            int c = circularBuffer.next();
+            int c = stream.getCurrentByte();
             if (c < 0) {
-                circularBuffer.prev();
                 break;
             } else if (escape) {
+                escape = false;
                 switch (c) {
                     case '"':
                         sb.append('\"');
@@ -93,31 +96,38 @@ public class JSONParser extends ValueParser {
                         sb.append('\\');
                         break;
                     case 'u':
-                        int codePoint = parseHex(circularBuffer);
+                        stream.read();
+                        int codePoint = parseHex(stream);
                         sb.appendCodePoint(codePoint);
-                        break;
+                        continue;
                     default:
                         throw error(ParseException::new, "Unrecognized escape sequence '\\%c'", c);
                 }
-                escape = false;
             } else if (c == '\\') {
                 escape = true;
             } else if (c == '\"') {
-                break;
+                if (start) break;
+                else start = true;
             } else {
                 sb.appendCodePoint(c);
             }
+            stream.read();
         }
         return sb.toString();
     }
 
-    private final void consumeExpected(CircularBuffer circularBuffer, String expected, String errorMessage) {
-        for (int i = 0; i < expected.length(); i++) {
-            int c = circularBuffer.next();
+    private final void consumeExpected(LookAheadTextInputStream stream, String expected, String errorMessage) {
+        int i = 0;
+        while (true) {
+            int c = stream.getCurrentByte();
             if (c < 0) {
                 throw error(IOException::new, "Unexpected end of stream");
             }
             if (c != expected.codePointAt(i)) throw error(ParseException::new, errorMessage);
+            else if (++i >= expected.length()) {
+                break;
+            }
+            stream.read();
         }
     }
 
@@ -139,11 +149,10 @@ public class JSONParser extends ValueParser {
     @Override
     @SneakyThrows
     public Value parse(Reader reader) {
-        final CircularBuffer circularBuffer = new CircularBuffer(reader, 8) {
-
+        final LookAheadTextInputStream stream = new LookAheadTextInputStream(reader) {
             @Override
-            public int next() {
-                int result = super.next();
+            public int read() {
+                int result = super.read();
                 if (result == '\n') {
                     ++currentLine;
                     currentColumn = 1;
@@ -152,26 +161,14 @@ public class JSONParser extends ValueParser {
                 }
                 return result;
             }
-
-            @Override
-            public int prev() {
-                int result = super.prev();
-                if (result == '\n') {
-                    --currentLine;
-                } else {
-                    --currentColumn;
-                }
-                return result;
-            }
         };
 
         try {
             while (true) {
-                int c = circularBuffer.next();
+                int c = stream.getCurrentByte();
                 if (c == -1) {
                     break;
                 } else if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
-                    continue;
                 } else if (c == '{') {
                     beginObject();
                 } else if (c == '}') {
@@ -181,14 +178,16 @@ public class JSONParser extends ValueParser {
                 } else if (c == ']') {
                     endArray();
                 } else if (isDecimal(c)) {
-                    circularBuffer.prev();
                     try {
-                        parseNumber(circularBuffer);
+                        parseNumber(stream);
+                        continue;
                     } catch (NumberFormatException nfe) {
-
+                        throw error(ParseException::new, nfe.getMessage());
                     }
                 } else if (c == '\"') {
-                    String text = readString(circularBuffer);
+                    if (currentLine == 125)
+                        System.out.print("");
+                    String text = readString(stream);
                     ObjectStackLevel osl;
                     if ((osl = WorthUtils.dynamicCast(stack.lastElement(), ObjectStackLevel.class)) != null && osl.currentKey == null) {
                         objectKey(text);
@@ -196,15 +195,16 @@ public class JSONParser extends ValueParser {
                         stringValue(text);
                     }
                 } else if (c == 't') {
-                    consumeExpected(circularBuffer, "rue", "Unrecognized boolean value");
+                    consumeExpected(stream, "true", "Unrecognized boolean value");
                     booleanValue(true);
                 } else if (c == 'f') {
-                    consumeExpected(circularBuffer, "alse", "Unrecognized boolean value");
+                    consumeExpected(stream, "false", "Unrecognized boolean value");
                     booleanValue(false);
                 } else if (c == 'n') {
-                    consumeExpected(circularBuffer, "ull", "Unrecognized null value");
+                    consumeExpected(stream, "null", "Unrecognized null value");
                     nullValue();
                 }
+                stream.read();
             }
             if (stack.size() > 1) {
                 char c;

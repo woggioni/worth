@@ -3,21 +3,22 @@ package org.oggio88.worth.buffer;
 import lombok.SneakyThrows;
 
 import java.io.InputStream;
+import java.io.Reader;
 
-public class LookAheadInputStream extends InputStream {
+public class LookAheadTextInputStream extends InputStream {
 
-    private final InputStream stream;
+    private final Reader reader;
     private int currentByte;
 
-    LookAheadInputStream(InputStream stream) {
-        this.stream = stream;
+    public LookAheadTextInputStream(Reader reader) {
+        this.reader = reader;
     }
 
     @Override
     @SneakyThrows
     public int read() {
         int result = currentByte;
-        currentByte = stream.read();
+        currentByte = reader.read();
         return result;
     }
 

@@ -7,6 +7,7 @@ import lombok.SneakyThrows;
 import org.junit.Assert;
 import org.junit.Test;
 import org.oggio88.worth.buffer.CircularBuffer;
+import org.oggio88.worth.buffer.LookAheadTextInputStream;
 import org.oggio88.worth.exception.NotImplementedException;
 import org.oggio88.worth.utils.WorthUtils;
 import org.oggio88.worth.value.ArrayValue;
@@ -87,6 +88,102 @@ public class JSONTest {
         }
     }
 
+    private interface Callback {
+        void call(Value value, JsonNode jsonNode);
+    }
+
+    private boolean compareValueAndJsonNode(Value value, JsonNode jsonNode, Callback cb) {
+        switch (value.type()) {
+            case NULL: {
+                boolean result = jsonNode.getNodeType() == JsonNodeType.NULL;
+                if (result) return true;
+                else {
+                    cb.call(value, jsonNode);
+                    return false;
+                }
+            }
+            case INTEGER:
+                if (jsonNode.getNodeType() == JsonNodeType.NUMBER) {
+                    boolean result = value.asInteger() == jsonNode.asLong();
+                    if (result) return true;
+                    else {
+                        cb.call(value, jsonNode);
+                        return false;
+                    }
+                } else {
+                    cb.call(value, jsonNode);
+                    return false;
+                }
+            case DOUBLE:
+                if (jsonNode.getNodeType() == JsonNodeType.NUMBER) {
+                    boolean result = value.asFloat() == jsonNode.asDouble();
+                    if (result) return true;
+                    else {
+                        cb.call(value, jsonNode);
+                        return false;
+                    }
+                } else {
+                    cb.call(value, jsonNode);
+                    return false;
+                }
+            case BOOLEAN:
+                if (jsonNode.getNodeType() == JsonNodeType.BOOLEAN) {
+                    boolean result = value.asBoolean() == jsonNode.asBoolean();
+                    if (result) return true;
+                    else {
+                        cb.call(value, jsonNode);
+                        return false;
+                    }
+                } else {
+                    cb.call(value, jsonNode);
+                    return false;
+                }
+            case STRING:
+                if (jsonNode.getNodeType() == JsonNodeType.STRING) {
+                    boolean result = value.asString().equals(jsonNode.asText());
+                    if (result) return true;
+                    else {
+                        cb.call(value, jsonNode);
+                        return false;
+                    }
+                } else {
+                    cb.call(value, jsonNode);
+                    return false;
+                }
+            case ARRAY:
+                ArrayValue array = WorthUtils.dynamicCast(value, ArrayValue.class);
+                if (jsonNode.getNodeType() == JsonNodeType.ARRAY && array.size() == jsonNode.size()) {
+                    for (int i = 0; i < array.size(); i++) {
+                        if (!compareValueAndJsonNode(array.get(i), jsonNode.get(i), cb)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                } else {
+                    cb.call(value, jsonNode);
+                    return false;
+                }
+            case OBJECT:
+                ObjectValue object = WorthUtils.dynamicCast(value, ObjectValue.class);
+                if (jsonNode.getNodeType() == JsonNodeType.OBJECT) {
+                    for (Map.Entry<String, Value> entry : object) {
+                        if (!jsonNode.has(entry.getKey())) {
+                            cb.call(value, jsonNode);
+                            return false;
+                        } else if (!compareValueAndJsonNode(entry.getValue(), jsonNode.get(entry.getKey()), cb)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                } else {
+                    cb.call(value, jsonNode);
+                    return false;
+                }
+            default:
+                throw new NotImplementedException("This should never happen");
+        }
+    }
+
     @Test
     @SneakyThrows
     public void consistencyTest() {
@@ -116,7 +213,9 @@ public class JSONTest {
             ObjectMapper om = new ObjectMapper();
             JsonNode jsonNode = om.readTree(getTestSource(testFile));
             Value value = new JSONParser().parse(getTestSource(testFile));
-            Assert.assertTrue(compareValueAndJsonNode(value, jsonNode));
+            Assert.assertTrue(compareValueAndJsonNode(value, jsonNode, (v, j) -> {
+                Assert.fail("Difference found");
+            }));
         }
     }
 
@@ -126,9 +225,11 @@ public class JSONTest {
         String hex = "1F608";
         byte[] buffer = new String(hex).getBytes();
         ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-        Method method = JSONParser.class.getDeclaredMethod("parseHex", CircularBuffer.class);
+        Method method = JSONParser.class.getDeclaredMethod("parseHex", LookAheadTextInputStream.class);
         method.setAccessible(true);
-        int result = (int) method.invoke(null, new CircularBuffer(new InputStreamReader(bais), 5));
+        LookAheadTextInputStream ltis = new LookAheadTextInputStream(new InputStreamReader(bais));
+        ltis.read();
+        int result = (int) method.invoke(null, ltis);
         Assert.assertEquals((int) Integer.valueOf(hex, 16), result);
     }
 }
