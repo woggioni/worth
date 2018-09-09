@@ -68,6 +68,15 @@ public class PerformanceTest {
     }
 
     @Test
+    @Ignore
+    @SneakyThrows
+    public void profilerTest() {
+        while (true) {
+            Value value = new JSONParser().parse(getClass().getResourceAsStream("/wordpress.json"));
+        }
+    }
+
+    @Test
     @SneakyThrows
     public void loopTest() {
         double jacksonTime, worthTime, antlrTime;
