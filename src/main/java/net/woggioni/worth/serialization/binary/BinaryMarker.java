@@ -15,8 +15,8 @@ public enum BinaryMarker {
     EmptyArray(0xaf),
     LargeArray(0xff);
 
-    public byte value;
+    public int value;
     BinaryMarker(int b) {
-        value = (byte) b;
+        value = b;
     }
 }

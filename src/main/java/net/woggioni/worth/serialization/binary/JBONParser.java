@@ -47,43 +47,49 @@ public class JBONParser extends ValueParser {
                     String text = new String(buffer);
                     objectKey(text);
                 }
-                byte b;
-                {
-                    int c = stream.read();
-                    if(c == -1) {
-                        break;
-                    }
-                    b = (byte) c;
+                int c = stream.read();
+                if(c == -1) {
+                    break;
                 }
-                if(b == BinaryMarker.Null.value) {
+                if(c == BinaryMarker.Null.value) {
                     nullValue();
-                } else if(b == BinaryMarker.True.value) {
+                } else if(c == BinaryMarker.True.value) {
                     booleanValue(true);
-                } else if(b == BinaryMarker.False.value) {
+                } else if(c == BinaryMarker.False.value) {
                     booleanValue(false);
-                } else if(b == BinaryMarker.Int.value) {
+                } else if(c == BinaryMarker.Int.value) {
                     integerValue(decoder.decode());
-                } else if(b == BinaryMarker.Float.value) {
+                } else if(c == BinaryMarker.Float.value) {
                     floatValue(decoder.decodeDouble());
-                } else if(b == BinaryMarker.EmptyString.value) {
+                } else if(c == BinaryMarker.EmptyString.value) {
                     stringValue("");
-                } else if(b == BinaryMarker.LargeString.value) {
+                } else if(c > BinaryMarker.EmptyString.value &&
+                    c < BinaryMarker.LargeString.value) {
+                    byte[] buffer = new byte[c - BinaryMarker.EmptyString.value];
+                    stream.read(buffer);
+                    String text = new String(buffer);
+                    stringValue(text);
+                } else if(c == BinaryMarker.LargeString.value) {
                     byte[] buffer = new byte[(int) decoder.decode()];
                     stream.read(buffer);
                     String text = new String(buffer);
                     stringValue(text);
-                } else if(b == BinaryMarker.EmptyArray.value) {
+                } else if(c == BinaryMarker.EmptyArray.value) {
                     beginArray(0);
-                } else if(b == BinaryMarker.LargeArray.value) {
+                } else if(c > BinaryMarker.EmptyArray.value && c < BinaryMarker.LargeArray.value) {
+                    beginArray(c - BinaryMarker.EmptyArray.value);
+                } else if(c == BinaryMarker.LargeArray.value) {
                     long size = decoder.decode();
                     beginArray(size);
-                } else if(b == BinaryMarker.EmptyObject.value) {
+                } else if(c == BinaryMarker.EmptyObject.value) {
                     beginObject(0);
-                } else if(b == BinaryMarker.LargeObject.value) {
+                } else if(c > BinaryMarker.EmptyObject.value && c < BinaryMarker.LargeObject.value) {
+                    beginObject(c - BinaryMarker.EmptyObject.value);
+                } else if(c == BinaryMarker.LargeObject.value) {
                     long size = decoder.decode();
                     beginObject(size);
                 } else {
-                    throw new ParseException(String.format("Illegal byte at position %d: 0x%02x", cursor, b));
+                    throw new ParseException(String.format("Illegal byte at position %d: 0x%02x", cursor, c));
                 }
                 while(stack.size() > 0) {
                     if ((osl = WorthUtils.dynamicCast(stack.getFirst(), ObjectStackLevel.class)) != null

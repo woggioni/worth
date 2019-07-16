@@ -94,6 +94,8 @@ public class JBONDumper extends ValueDumper {
     protected void beginObject(int size) {
         if(size == 0) {
             os.write(BinaryMarker.EmptyObject.value);
+        } else if(size < BinaryMarker.LargeObject.value - BinaryMarker.EmptyObject.value) {
+            os.write(BinaryMarker.EmptyObject.value + size);
         } else {
             os.write(BinaryMarker.LargeObject.value);
             Leb128.encode(os, size);
@@ -110,6 +112,8 @@ public class JBONDumper extends ValueDumper {
     protected void beginArray(int size) {
         if(size == 0) {
             os.write(BinaryMarker.EmptyArray.value);
+        } else if(size < BinaryMarker.LargeArray.value - BinaryMarker.EmptyArray.value) {
+            os.write(BinaryMarker.EmptyArray.value + size);
         } else {
             os.write(BinaryMarker.LargeArray.value);
             Leb128.encode(os, size);
@@ -135,10 +139,15 @@ public class JBONDumper extends ValueDumper {
         if(value.isEmpty()) {
             os.write(BinaryMarker.EmptyString.value);
         } else {
-            os.write(BinaryMarker.LargeString.value);
             byte[] bytes = value.getBytes();
-            Leb128.encode(os, bytes.length);
-            os.write(value.getBytes());
+            if(bytes.length < BinaryMarker.LargeString.value - BinaryMarker.EmptyString.value) {
+                os.write(BinaryMarker.EmptyString.value + bytes.length);
+                os.write(value.getBytes());
+            } else {
+                os.write(BinaryMarker.LargeString.value);
+                Leb128.encode(os, bytes.length);
+                os.write(value.getBytes());
+            }
         }
     }
 
