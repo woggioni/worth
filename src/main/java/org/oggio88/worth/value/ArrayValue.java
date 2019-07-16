@@ -6,6 +6,7 @@ import org.oggio88.worth.xface.Value;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 @EqualsAndHashCode
 public class ArrayValue implements Value, Iterable<Value> {
@@ -32,7 +33,12 @@ public class ArrayValue implements Value, Iterable<Value> {
 
     @Override
     public Value get(int index) {
-        return value.get(index);
+        int sz = size();
+        if(index < sz) {
+            return value.get(Math.floorMod(index, sz));
+        } else {
+            return Value.Null;
+        }
     }
 
     @Override
@@ -63,6 +69,7 @@ public class ArrayValue implements Value, Iterable<Value> {
         return value.iterator();
     }
 
+    @Override
     public int size() {
         return value.size();
     }

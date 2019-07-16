@@ -4,19 +4,21 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.oggio88.worth.antlr.JSONLexer;
 import org.oggio88.worth.antlr.JSONListenerImpl;
+import org.oggio88.worth.serialization.binary.JBONDumper;
+import org.oggio88.worth.value.ObjectValue;
+import org.oggio88.worth.xface.Dumper;
 import org.oggio88.worth.xface.Value;
 import org.tukaani.xz.XZInputStream;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Paths;
 
 class Chronometer {
@@ -54,17 +56,8 @@ class Chronometer {
 public class PerformanceTest {
 
     @SneakyThrows
-    private static byte[] extractTestData() {
-        ByteArrayOutputStream baous = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024 * 1024];
-        try (InputStream is = new XZInputStream(PerformanceTest.class.getResourceAsStream("/citylots.json.xz"))) {
-            while (true) {
-                int read = is.read(buffer);
-                if (read < 0) break;
-                baous.write(buffer, 0, read);
-            }
-        }
-        return baous.toByteArray();
+    private static InputStream extractTestData() {
+        return new XZInputStream(PerformanceTest.class.getResourceAsStream("/citylots.json.xz"));
     }
 
     @Test
@@ -83,9 +76,9 @@ public class PerformanceTest {
         final int loops = 100;
         Chronometer chr = new Chronometer();
         {
+            ObjectMapper om = new ObjectMapper();
             chr.reset();
             for (int i = 0; i < loops; i++) {
-                ObjectMapper om = new ObjectMapper();
                 JsonNode jsonNode = om.readTree(getClass().getResourceAsStream("/wordpress.json"));
             }
             jacksonTime = chr.stop(Chronometer.TimeUnit.MILLISECOND);
@@ -102,8 +95,8 @@ public class PerformanceTest {
         {
             chr.reset();
             for (int i = 0; i < loops; i++) {
-                ANTLRInputStream inputStream = new ANTLRInputStream(
-                        getClass().getResourceAsStream("/wordpress.json"));
+                CharStream inputStream = CharStreams.fromReader(
+                        new InputStreamReader(getClass().getResourceAsStream("/wordpress.json")));
                 JSONLexer lexer = new JSONLexer(inputStream);
                 CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
                 org.oggio88.worth.antlr.JSONParser parser = new org.oggio88.worth.antlr.JSONParser(commonTokenStream);
@@ -120,25 +113,24 @@ public class PerformanceTest {
     @Ignore
     @SneakyThrows
     public void hugeJSONTest() {
-        byte[] testData = extractTestData();
         double jacksonTime, worthTime, antlrTime;
         Chronometer chr = new Chronometer();
-        {
+        try(InputStream is = extractTestData()) {
             chr.reset();
             ObjectMapper om = new ObjectMapper();
-            JsonNode jsonNode = om.readTree(new ByteArrayInputStream(testData));
+            om.readTree(is);
             jacksonTime = chr.stop(Chronometer.TimeUnit.SECOND);
             System.out.printf("Jackson time: %8s sec\n", String.format("%.3f", jacksonTime));
         }
-        {
+        try(InputStream is = extractTestData()) {
             chr.reset();
-            Value value = new JSONParser().parse(new ByteArrayInputStream(testData));
+            new JSONParser().parse(is);
             worthTime = chr.stop(Chronometer.TimeUnit.SECOND);
             System.out.printf("Worth time:   %8s sec\n", String.format("%.3f", worthTime));
         }
-        {
+        try(InputStream is = extractTestData()) {
             chr.reset();
-            ANTLRInputStream inputStream = new ANTLRInputStream(new ByteArrayInputStream(testData));
+            CharStream inputStream = CharStreams.fromReader(new InputStreamReader(is));
             JSONLexer lexer = new JSONLexer(inputStream);
             CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
             org.oggio88.worth.antlr.JSONParser parser = new org.oggio88.worth.antlr.JSONParser(commonTokenStream);

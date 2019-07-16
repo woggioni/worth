@@ -4,7 +4,6 @@ organization := "org.oggio88"
 
 version := "1.0"
 resolvers += Resolver.mavenLocal
-scalaVersion := "2.12.6"
 
 scalacOptions ++= Seq(
     "-unchecked",
@@ -17,16 +16,16 @@ scalacOptions ++= Seq(
 
 git.useGitDescribe := true
 fork := true
-//javaOptions in Test += "-Dorg.oggio88.javason.value.ObjectValue.listBasedImplementation=true"
-javaOptions in Test += "-Xmx6G"
+//javaOptions in Test += "-Dorg.oggio88.worth.value.ObjectValue.listBasedImplementation=true"
+//javaOptions in Test += "-Xmx14G"
 //scalafmtOnCompile := true
 libraryDependencies += "org.projectlombok" % "lombok" % "1.18.2"
-libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test"
-libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.9.6" % "test"
+libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test
+libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.9.6" % Test
 
-libraryDependencies += "org.antlr" % "antlr4" % "4.7.1" % "test"
-libraryDependencies += "org.antlr" % "antlr4-runtime" % "4.7.1" % "test"
-libraryDependencies += "org.tukaani" % "xz" % "1.8" % "test"
+libraryDependencies += "org.antlr" % "antlr4" % "4.7.1" % Test
+libraryDependencies += "org.antlr" % "antlr4-runtime" % "4.7.1" % Test
+libraryDependencies += "org.tukaani" % "xz" % "1.8" % Test
 
 artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
   artifact.name + "-" + module.revision + "." + artifact.extension

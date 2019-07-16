@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import lombok.SneakyThrows;
 import org.junit.Assert;
 import org.junit.Test;
-import org.oggio88.worth.buffer.CircularBuffer;
 import org.oggio88.worth.buffer.LookAheadTextInputStream;
 import org.oggio88.worth.exception.NotImplementedException;
 import org.oggio88.worth.utils.WorthUtils;
@@ -187,7 +186,7 @@ public class JSONTest {
     @Test
     @SneakyThrows
     public void consistencyTest() {
-        System.setProperty("org.oggio88.javason.value.ObjectValue.preserveKeyOrder", "true");
+        System.setProperty(ObjectValue.class.getName() + ".preserveKeyOrder", "true");
         for (String testFile : testFiles) {
             Parser parser = new JSONParser();
             Value parsedValue = parser.parse(getTestSource(testFile));
@@ -209,8 +208,8 @@ public class JSONTest {
     @Test
     @SneakyThrows
     public void comparativeTest() {
+        ObjectMapper om = new ObjectMapper();
         for (String testFile : testFiles) {
-            ObjectMapper om = new ObjectMapper();
             JsonNode jsonNode = om.readTree(getTestSource(testFile));
             Value value = new JSONParser().parse(getTestSource(testFile));
             Assert.assertTrue(compareValueAndJsonNode(value, jsonNode, (v, j) -> {
@@ -223,7 +222,7 @@ public class JSONTest {
     @SneakyThrows
     public void hexTest() {
         String hex = "1F608";
-        byte[] buffer = new String(hex).getBytes();
+        byte[] buffer = hex.getBytes();
         ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
         Method method = JSONParser.class.getDeclaredMethod("parseHex", LookAheadTextInputStream.class);
         method.setAccessible(true);

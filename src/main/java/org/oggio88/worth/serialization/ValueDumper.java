@@ -11,9 +11,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.ArrayDeque;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Stack;
 
 public abstract class ValueDumper implements Dumper {
 
@@ -62,10 +62,10 @@ public abstract class ValueDumper implements Dumper {
     }
 
 
-    protected Stack<StackLevel> stack;
+    protected ArrayDeque<StackLevel> stack;
 
     protected ValueDumper() {
-        stack = new Stack<>();
+        stack = new ArrayDeque<>();
     }
 
     @Override
@@ -83,11 +83,11 @@ public abstract class ValueDumper implements Dumper {
         dump(value, new OutputStreamWriter(stream, encoding));
     }
 
-    protected abstract void beginObject();
+    protected abstract void beginObject(int size);
 
     protected abstract void endObject();
 
-    protected abstract void beginArray();
+    protected abstract void beginArray(int size);
 
     protected abstract void endArray();
 

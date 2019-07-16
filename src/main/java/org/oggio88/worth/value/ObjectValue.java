@@ -6,19 +6,16 @@ import org.oggio88.worth.xface.Value;
 
 import java.util.*;
 
-import static org.oggio88.worth.utils.WorthUtils.equalsNullSafe;
-
-
 public interface ObjectValue extends Value, Iterable<Map.Entry<String, Value>> {
 
     boolean listBasedImplementation = Boolean.valueOf(
-            System.getProperty("org.oggio88.javason.value.ObjectValue.listBasedImplementation", "false"));
+            System.getProperty(ObjectValue.class.getName() + ".listBasedImplementation", "false"));
     boolean preserveKeyOrder = Boolean.valueOf(
-            System.getProperty("org.oggio88.javason.value.MapObjectValue.preserveKeyOrder", "false"));
+            System.getProperty(ObjectValue.class.getName() + ".preserveKeyOrder", "false"));
 
     static ObjectValue newInstance() {
         if (listBasedImplementation) {
-            return new MapObjectValue();
+            return new ListObjectValue();
         } else {
             return new MapObjectValue();
         }
@@ -63,7 +60,7 @@ class MapObjectValue implements ObjectValue {
     private final Map<String, Value> value;
 
     public MapObjectValue() {
-        this.value = ObjectValue.preserveKeyOrder ? new LinkedHashMap() : new HashMap();
+        this.value = ObjectValue.preserveKeyOrder ? new LinkedHashMap<>() : new HashMap<>();
     }
 
     public MapObjectValue(Map<String, Value> value) {
@@ -72,25 +69,17 @@ class MapObjectValue implements ObjectValue {
 
     @Override
     public Map<String, Value> asObject() {
-        return value;
+        return Collections.unmodifiableMap(value);
     }
 
     @Override
     public Value get(String key) {
-        Value result = value.get(key);
-        if (result == null) {
-            result = Value.Null;
-            value.put(key, result);
-        }
-        return result;
+        return value.getOrDefault(key, Value.Null);
     }
 
     @Override
     public Value getOrDefault(String key, Value defaultValue) {
-        if (value.containsKey(key))
-            return value.get(key);
-        else
-            return defaultValue;
+        return value.getOrDefault(key, defaultValue);
     }
 
     @Override
@@ -118,13 +107,18 @@ class MapObjectValue implements ObjectValue {
     public Iterator<Map.Entry<String, Value>> iterator() {
         return value.entrySet().iterator();
     }
+
+    @Override
+    public int size() {
+        return value.size();
+    }
 }
 
 @NoArgsConstructor
 @EqualsAndHashCode
 class ListObjectValue implements ObjectValue {
 
-    private final List<Map.Entry<String, Value>> value = new ArrayList();
+    private final List<Map.Entry<String, Value>> value = new ArrayList<>();
 
     public ListObjectValue(Map<String, Value> map) {
         this.value.addAll(map.entrySet());
@@ -132,17 +126,17 @@ class ListObjectValue implements ObjectValue {
 
     @Override
     public Map<String, Value> asObject() {
-        Map<String, Value> result = preserveKeyOrder ? new LinkedHashMap() : new HashMap();
+        Map<String, Value> result = preserveKeyOrder ? new LinkedHashMap<>() : new HashMap<>();
         for (Map.Entry<String, Value> entry : value) {
             result.put(entry.getKey(), entry.getValue());
         }
-        return result;
+        return Collections.unmodifiableMap(result);
     }
 
     @Override
     public Value get(String key) {
         for (Map.Entry<String, Value> entry : value) {
-            if(equalsNullSafe(entry.getKey(), key)) return entry.getValue();
+            if(Objects.equals(entry.getKey(), key)) return entry.getValue();
         }
         return Value.Null;
     }
@@ -150,7 +144,7 @@ class ListObjectValue implements ObjectValue {
     @Override
     public Value getOrDefault(String key, Value defaultValue) {
         for (Map.Entry<String, Value> entry : value) {
-            if(equalsNullSafe(entry.getKey(), key)) return entry.getValue();
+            if(Objects.equals(entry.getKey(), key)) return entry.getValue();
         }
         return defaultValue;
     }
@@ -158,7 +152,7 @@ class ListObjectValue implements ObjectValue {
     @Override
     public Value getOrPut(String key, Value value2Put) {
         for (Map.Entry<String, Value> entry : value) {
-            if(equalsNullSafe(entry.getKey(), key)) return entry.getValue();
+            if(Objects.equals(entry.getKey(), key)) return entry.getValue();
         }
         put(key, value2Put);
         return value2Put;
@@ -173,7 +167,7 @@ class ListObjectValue implements ObjectValue {
     @Override
     public boolean has(String key) {
         for (Map.Entry<String, Value> entry : value) {
-            if(equalsNullSafe(entry.getKey(), key)) return true;
+            if(Objects.equals(entry.getKey(), key)) return true;
         }
         return false;
     }
@@ -181,5 +175,10 @@ class ListObjectValue implements ObjectValue {
     @Override
     public Iterator<Map.Entry<String, Value>> iterator() {
         return value.iterator();
+    }
+
+    @Override
+    public int size() {
+        return value.size();
     }
 }

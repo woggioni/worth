@@ -9,7 +9,7 @@ public class LookAheadInputStream extends InputStream {
     private final InputStream stream;
     private int currentByte;
 
-    LookAheadInputStream(InputStream stream) {
+    public LookAheadInputStream(InputStream stream) {
         this.stream = stream;
     }
 
@@ -21,7 +21,7 @@ public class LookAheadInputStream extends InputStream {
         return result;
     }
 
-    public int getCurrentByte(){
+    public int getCurrentByte() {
         return currentByte;
     }
 }

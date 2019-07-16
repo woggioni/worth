@@ -20,7 +20,7 @@ public class JSONListenerImpl extends ValueParser implements JSONListener {
 
     @Override
     public void exitJson(JSONParser.JsonContext ctx) {
-        result = stack.get(0).value;
+        result = stack.getFirst().value;
         stack.clear();
     }
 

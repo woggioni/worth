@@ -5,6 +5,7 @@ import org.oggio88.worth.value.NullValue;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface Value {
 
@@ -38,6 +39,10 @@ public interface Value {
 
     default Map<String, Value> asObject() {
         throw new TypeException("Not an object");
+    }
+
+    default int size() {
+        throw new TypeException("Neither an array nor an object");
     }
 
     default void add(Value value) {

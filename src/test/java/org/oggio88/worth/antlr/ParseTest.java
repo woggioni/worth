@@ -1,12 +1,15 @@
 package org.oggio88.worth.antlr;
 
 import lombok.SneakyThrows;
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Test;
 import org.oggio88.worth.serialization.json.JSONDumper;
 import org.oggio88.worth.xface.Value;
+
+import java.io.InputStreamReader;
 
 public class ParseTest {
 
@@ -14,7 +17,7 @@ public class ParseTest {
     @SneakyThrows
     public void test(){
 
-        ANTLRInputStream inputStream = new ANTLRInputStream(getClass().getResourceAsStream("/test.json"));
+        CodePointCharStream inputStream = CharStreams.fromReader(new InputStreamReader(getClass().getResourceAsStream("/test.json")));
         JSONLexer lexer = new JSONLexer(inputStream);
             CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
         JSONParser parser = new JSONParser(commonTokenStream);

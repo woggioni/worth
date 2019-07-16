@@ -69,7 +69,7 @@ public class JSONParser extends ValueParser {
         }
     }
 
-    private final String readString(LookAheadTextInputStream stream) {
+    private String readString(LookAheadTextInputStream stream) {
         StringBuilder sb = new StringBuilder();
         boolean escape = false;
         boolean start = false;
@@ -116,7 +116,7 @@ public class JSONParser extends ValueParser {
         return sb.toString();
     }
 
-    private final void consumeExpected(LookAheadTextInputStream stream, String expected, String errorMessage) {
+    private void consumeExpected(LookAheadTextInputStream stream, String expected, String errorMessage) {
         int i = 0;
         while (true) {
             int c = stream.getCurrentByte();
@@ -185,11 +185,9 @@ public class JSONParser extends ValueParser {
                         throw error(ParseException::new, nfe.getMessage());
                     }
                 } else if (c == '\"') {
-                    if (currentLine == 125)
-                        System.out.print("");
                     String text = readString(stream);
                     ObjectStackLevel osl;
-                    if ((osl = WorthUtils.dynamicCast(stack.lastElement(), ObjectStackLevel.class)) != null && osl.currentKey == null) {
+                    if ((osl = WorthUtils.dynamicCast(stack.getFirst(), ObjectStackLevel.class)) != null && osl.currentKey == null) {
                         objectKey(text);
                     } else {
                         stringValue(text);
@@ -208,16 +206,16 @@ public class JSONParser extends ValueParser {
             }
             if (stack.size() > 1) {
                 char c;
-                if (stack.lastElement() instanceof ArrayStackLevel) {
+                if (stack.getFirst() instanceof ArrayStackLevel) {
                     c = ']';
-                } else if (stack.lastElement() instanceof ObjectStackLevel) {
+                } else if (stack.getFirst() instanceof ObjectStackLevel) {
                     c = '}';
                 } else {
                     throw new NotImplementedException("This should never happen");
                 }
                 throw error(ParseException::new, "Missing '%c' token", c);
             }
-            return WorthUtils.dynamicCast(stack.lastElement(), ArrayStackLevel.class).value.get(0);
+            return WorthUtils.dynamicCast(stack.getFirst(), ArrayStackLevel.class).value.get(0);
         } catch (NumberFormatException e) {
             throw error(ParseException::new, e.getMessage());
         } finally {

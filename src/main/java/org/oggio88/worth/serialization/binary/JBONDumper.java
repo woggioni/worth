@@ -1,68 +1,38 @@
-package org.oggio88.worth.serialization.json;
+package org.oggio88.worth.serialization.binary;
 
 import lombok.SneakyThrows;
+import org.oggio88.worth.exception.NotImplementedException;
 import org.oggio88.worth.serialization.ValueDumper;
+import org.oggio88.worth.utils.Leb128;
 import org.oggio88.worth.value.ArrayValue;
 import org.oggio88.worth.value.ObjectValue;
 import org.oggio88.worth.xface.Dumper;
 import org.oggio88.worth.xface.Value;
 
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Map;
 import java.util.function.Consumer;
 
 import static org.oggio88.worth.utils.WorthUtils.dynamicCast;
 
-public class JSONDumper extends ValueDumper {
+public class JBONDumper extends ValueDumper {
 
     public static Dumper newInstance() {
-        return new JSONDumper();
+        return new JBONDumper();
     }
 
-    private Writer writer;
-
-    private String escapeString(String value){
-        StringBuilder sb = new StringBuilder();
-        for (char c : value.toCharArray()) {
-            switch (c) {
-                case '"':
-                    sb.append("\\\"");
-                    break;
-                case '\r':
-                    sb.append("\\r");
-                    break;
-                case '\n':
-                    sb.append("\\n");
-                    break;
-                case '\t':
-                    sb.append("\\t");
-                    break;
-                case '\\':
-                    sb.append("\\\\");
-                    break;
-                default: {
-                    if (c < 128)
-                        sb.append(c);
-                    else {
-                        sb.append("\\u").append(String.format("%04X", (int) c));
-                    }
-                }
-            }
-        }
-        return sb.toString();
-    }
+    protected OutputStream os;
 
     @Override
-    public void dump(Value value, OutputStream stream) {
-        dump(value, new OutputStreamWriter(stream));
+    public void dump(Value value, Writer writer) {
+        throw new NotImplementedException(null);
     }
 
     @Override
     @SneakyThrows
-    public void dump(Value value, Writer writer) {
-        this.writer = writer;
+    public void dump(Value value, OutputStream outputStream) {
+        this.os = outputStream;
         final Consumer<Value> handle_value = (v) -> {
             switch (v.type()) {
                 case NULL:
@@ -87,7 +57,7 @@ public class JSONDumper extends ValueDumper {
                     break;
                 case OBJECT:
                     ObjectValue objectValue = dynamicCast(v, ObjectValue.class);
-                    stack.push(new ObjectStackLevel(dynamicCast(v, ObjectValue.class)));
+                    stack.push(new ObjectStackLevel(objectValue));
                     beginObject(objectValue.size());
                     break;
             }
@@ -100,9 +70,6 @@ public class JSONDumper extends ValueDumper {
             ObjectStackLevel objectStackLevel;
             if ((arrayStackLevel = dynamicCast(last, ArrayStackLevel.class)) != null) {
                 if (arrayStackLevel.hasNext()) {
-                    if (arrayStackLevel.index > 0) {
-                        writer.write(",");
-                    }
                     handle_value.accept(arrayStackLevel.next());
                 } else {
                     endArray();
@@ -110,12 +77,8 @@ public class JSONDumper extends ValueDumper {
                 }
             } else if ((objectStackLevel = dynamicCast(last, ObjectStackLevel.class)) != null) {
                 if (objectStackLevel.hasNext()) {
-                    if (objectStackLevel.index > 0) {
-                        writer.write(",");
-                    }
                     Map.Entry<String, Value> entry = objectStackLevel.next();
                     objectKey(entry.getKey());
-                    writer.write(":");
                     handle_value.accept(entry.getValue());
                 } else {
                     endObject();
@@ -123,67 +86,90 @@ public class JSONDumper extends ValueDumper {
                 }
             }
         }
-        this.writer.flush();
-        this.writer = null;
+        this.os.flush();
+        this.os = null;
     }
 
     @Override
     @SneakyThrows
     protected void beginObject(int size) {
-        this.writer.write("{");
+        if(size == 0) {
+            os.write(BinaryMarker.EmptyObject.value);
+        } else {
+            os.write(BinaryMarker.LargeObject.value);
+            Leb128.encode(os, size);
+        }
     }
 
     @Override
     @SneakyThrows
     protected void endObject() {
-        this.writer.write("}");
     }
 
     @Override
     @SneakyThrows
     protected void beginArray(int size) {
-        this.writer.write("[");
+        if(size == 0) {
+            os.write(BinaryMarker.EmptyArray.value);
+        } else {
+            os.write(BinaryMarker.LargeArray.value);
+            Leb128.encode(os, size);
+        }
     }
 
     @Override
     @SneakyThrows
     protected void endArray() {
-        this.writer.write("]");
     }
 
     @Override
     @SneakyThrows
     protected void objectKey(String key) {
-        this.writer.write("\"" + escapeString(key) + "\"");
+        byte[] bytes = key.getBytes();
+        Leb128.encode(os, bytes.length);
+        os.write(key.getBytes());
     }
 
     @Override
     @SneakyThrows
     protected void stringValue(String value) {
-        this.writer.write("\"" + escapeString(value) + "\"");
+        if(value.isEmpty()) {
+            os.write(BinaryMarker.EmptyString.value);
+        } else {
+            os.write(BinaryMarker.LargeString.value);
+            byte[] bytes = value.getBytes();
+            Leb128.encode(os, bytes.length);
+            os.write(value.getBytes());
+        }
     }
 
     @Override
     @SneakyThrows
     protected void integerValue(long value) {
-        this.writer.write(Long.toString(value));
+        os.write(BinaryMarker.Int.value);
+        Leb128.encode(os, value);
     }
 
     @Override
     @SneakyThrows
     protected void floatValue(double value) {
-        this.writer.write(Double.toString(value));
+        os.write(BinaryMarker.Float.value);
+        Leb128.encode(os, value);
     }
 
     @Override
     @SneakyThrows
     protected void booleanValue(boolean value) {
-        this.writer.write(Boolean.toString(value));
+        if(value) {
+            os.write(BinaryMarker.True.value);
+        } else {
+            os.write(BinaryMarker.False.value);
+        }
     }
 
     @Override
     @SneakyThrows
     protected void nullValue() {
-        this.writer.write("null");
+        os.write(BinaryMarker.Null.value);
     }
 }

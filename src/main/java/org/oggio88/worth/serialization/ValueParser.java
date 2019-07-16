@@ -3,12 +3,7 @@ package org.oggio88.worth.serialization;
 import lombok.RequiredArgsConstructor;
 import org.oggio88.worth.exception.NotImplementedException;
 import org.oggio88.worth.utils.WorthUtils;
-import org.oggio88.worth.value.ArrayValue;
-import org.oggio88.worth.value.BooleanValue;
-import org.oggio88.worth.value.FloatValue;
-import org.oggio88.worth.value.IntegerValue;
-import org.oggio88.worth.value.ObjectValue;
-import org.oggio88.worth.value.StringValue;
+import org.oggio88.worth.value.*;
 import org.oggio88.worth.xface.Parser;
 import org.oggio88.worth.xface.Value;
 
@@ -16,18 +11,22 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
-import java.util.Stack;
+import java.util.ArrayDeque;
 
 public class ValueParser implements Parser {
 
     @RequiredArgsConstructor
     protected static class StackLevel {
         public final Value value;
+        public final long expectedSize;
     }
 
     protected static class ArrayStackLevel extends StackLevel {
         public ArrayStackLevel() {
-            super(new ArrayValue());
+            super(new ArrayValue(), -1);
+        }
+        public ArrayStackLevel(long expectedSize) {
+            super(new ArrayValue(), expectedSize);
         }
     }
 
@@ -35,14 +34,18 @@ public class ValueParser implements Parser {
         public String currentKey;
 
         public ObjectStackLevel() {
-            super(ObjectValue.newInstance());
+            super(ObjectValue.newInstance(), -1);
+        }
+
+        public ObjectStackLevel(long expectedSize) {
+            super(ObjectValue.newInstance(), expectedSize);
         }
     }
 
-    protected Stack<StackLevel> stack;
+    protected ArrayDeque<StackLevel> stack;
 
     private void add2Last(Value value) {
-        StackLevel last = stack.lastElement();
+        StackLevel last = stack.getFirst();
         ArrayStackLevel asl;
         ObjectStackLevel osl;
         if ((asl = WorthUtils.dynamicCast(last, ArrayStackLevel.class)) != null)
@@ -54,7 +57,7 @@ public class ValueParser implements Parser {
     }
 
     protected ValueParser() {
-        stack = new Stack<>();
+        stack = new ArrayDeque<>();
         stack.push(new ArrayStackLevel());
     }
 
@@ -77,6 +80,11 @@ public class ValueParser implements Parser {
         stack.push(new ObjectStackLevel());
     }
 
+    protected void beginObject(long size) {
+        stack.push(new ObjectStackLevel(size));
+    }
+
+
     protected void endObject() {
         add2Last(stack.pop().value);
     }
@@ -85,12 +93,16 @@ public class ValueParser implements Parser {
         stack.push(new ArrayStackLevel());
     }
 
+    protected void beginArray(long size) {
+        stack.push(new ArrayStackLevel(size));
+    }
+
     protected void endArray() {
         add2Last(stack.pop().value);
     }
 
     protected void objectKey(String key) {
-        ObjectStackLevel osl = (ObjectStackLevel) stack.lastElement();
+        ObjectStackLevel osl = (ObjectStackLevel) stack.getFirst();
         osl.currentKey = key;
     }
 
