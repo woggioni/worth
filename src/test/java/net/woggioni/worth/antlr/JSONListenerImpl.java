@@ -1,10 +1,10 @@
 package net.woggioni.worth.antlr;
 
+import net.woggioni.worth.serialization.ValueParser;
+import net.woggioni.worth.xface.Value;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import net.woggioni.worth.serialization.ValueParser;
-import net.woggioni.worth.xface.Value;
 
 public class JSONListenerImpl extends ValueParser implements JSONListener {
 

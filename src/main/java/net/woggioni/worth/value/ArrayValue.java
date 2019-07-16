@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import net.woggioni.worth.xface.Value;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -59,9 +60,8 @@ public class ArrayValue implements Value, Iterable<Value> {
 
     @Override
     public List<Value> asArray() {
-        return value;
+        return Collections.unmodifiableList(value);
     }
-
 
     @Override
     public Iterator<Value> iterator() {

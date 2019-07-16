@@ -1,12 +1,12 @@
 package net.woggioni.worth.serialization.json;
 
 import lombok.SneakyThrows;
+import net.woggioni.worth.serialization.ValueDumper;
 import net.woggioni.worth.utils.WorthUtils;
 import net.woggioni.worth.value.ArrayValue;
 import net.woggioni.worth.value.ObjectValue;
-import net.woggioni.worth.xface.Value;
-import net.woggioni.worth.serialization.ValueDumper;
 import net.woggioni.worth.xface.Dumper;
+import net.woggioni.worth.xface.Value;
 
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;

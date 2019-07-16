@@ -2,28 +2,47 @@ package net.woggioni.worth.value;
 
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import net.woggioni.worth.utils.WorthUtils;
 import net.woggioni.worth.xface.Value;
 
 import java.util.*;
 
 public interface ObjectValue extends Value, Iterable<Map.Entry<String, Value>> {
 
-    boolean listBasedImplementation = Boolean.valueOf(
-            System.getProperty(ObjectValue.class.getName() + ".listBasedImplementation", "false"));
-    boolean preserveKeyOrder = Boolean.valueOf(
-            System.getProperty(ObjectValue.class.getName() + ".preserveKeyOrder", "false"));
+    Implementation implementation = Implementation.valueOf(
+            System.getProperty(ObjectValue.class.getName() + ".implementation", "TreeMap"));
 
     static ObjectValue newInstance() {
-        if (listBasedImplementation) {
-            return new ListObjectValue();
-        } else {
-            return new MapObjectValue();
+        ObjectValue result;
+        switch(implementation) {
+            case ArrayList:
+                result = new ListObjectValue();
+                break;
+            case TreeMap:
+                result = new TreeMapObjectValue();
+                break;
+            case HashMap:
+                result = new HashMapObjectValue();
+                break;
+            case LinkedHashMap:
+                result = new LinkedHashMapObjectValue();
+                break;
+            default:
+                throw WorthUtils.newThrowable(IllegalArgumentException.class,
+                    "Unknown value of %s: %s",
+                    Implementation.class.getName(),
+                    implementation);
         }
+        return result;
     }
 
     @Override
     default Type type() {
         return Type.OBJECT;
+    }
+
+    enum Implementation {
+        ArrayList, TreeMap, HashMap, LinkedHashMap
     }
 }
 
@@ -55,13 +74,9 @@ final class ObjectEntry<K, V> implements Map.Entry<K, V> {
 }
 
 @EqualsAndHashCode
-class MapObjectValue implements ObjectValue {
+abstract class MapObjectValue implements ObjectValue {
 
     private final Map<String, Value> value;
-
-    public MapObjectValue() {
-        this.value = ObjectValue.preserveKeyOrder ? new LinkedHashMap<>() : new HashMap<>();
-    }
 
     public MapObjectValue(Map<String, Value> value) {
         this.value = value;
@@ -114,6 +129,31 @@ class MapObjectValue implements ObjectValue {
     }
 }
 
+@EqualsAndHashCode
+class HashMapObjectValue extends MapObjectValue {
+
+    public HashMapObjectValue() {
+        super(new HashMap<>());
+    }
+}
+
+@EqualsAndHashCode
+class LinkedHashMapObjectValue extends MapObjectValue {
+
+    public LinkedHashMapObjectValue() {
+        super(new LinkedHashMap<>());
+    }
+}
+
+@EqualsAndHashCode
+class TreeMapObjectValue extends MapObjectValue {
+
+    public TreeMapObjectValue() {
+        super(new TreeMap<>());
+    }
+}
+
+
 @NoArgsConstructor
 @EqualsAndHashCode
 class ListObjectValue implements ObjectValue {
@@ -126,7 +166,7 @@ class ListObjectValue implements ObjectValue {
 
     @Override
     public Map<String, Value> asObject() {
-        Map<String, Value> result = preserveKeyOrder ? new LinkedHashMap<>() : new HashMap<>();
+        Map<String, Value> result = new LinkedHashMap<>();
         for (Map.Entry<String, Value> entry : value) {
             result.put(entry.getKey(), entry.getValue());
         }

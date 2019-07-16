@@ -1,13 +1,13 @@
 package net.woggioni.worth.serialization.binary;
 
 import lombok.SneakyThrows;
-import org.junit.Assert;
-import org.junit.Test;
 import net.woggioni.worth.buffer.LookAheadTextInputStream;
 import net.woggioni.worth.serialization.json.JSONParser;
 import net.woggioni.worth.value.ObjectValue;
 import net.woggioni.worth.xface.Parser;
 import net.woggioni.worth.xface.Value;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.*;
 import java.lang.reflect.Method;
@@ -26,7 +26,7 @@ public class JBONTest {
     @Test
     @SneakyThrows
     public void consistencyTest() {
-        System.setProperty(ObjectValue.class.getName() + ".preserveKeyOrder", "true");
+        System.setProperty(ObjectValue.class.getName() + ".implementation", "TreeMap");
         for (String testFile : testFiles) {
             Value parsedValue;
             try(InputStream is = getTestSource(testFile)) {
@@ -59,7 +59,7 @@ public class JBONTest {
         for (String testFile : testFiles) {
             Value originalValue = new JSONParser().parse(getTestSource(testFile));
 
-            Path outputFile = Files.createTempFile(Paths.get("/tmp"),"worh", null);
+            Path outputFile = Files.createTempFile(Paths.get("/tmp"),"worth", null);
             try (OutputStream os = new FileOutputStream(outputFile.toFile())) {
                 JBONDumper jbonDumper = new JBONDumper();
                 jbonDumper.dump(originalValue, os);

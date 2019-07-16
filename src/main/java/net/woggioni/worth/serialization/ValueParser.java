@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import net.woggioni.worth.exception.NotImplementedException;
 import net.woggioni.worth.utils.WorthUtils;
 import net.woggioni.worth.value.*;
-import net.woggioni.worth.xface.Value;
 import net.woggioni.worth.xface.Parser;
+import net.woggioni.worth.xface.Value;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;

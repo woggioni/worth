@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import lombok.SneakyThrows;
-import org.junit.Assert;
-import org.junit.Test;
 import net.woggioni.worth.buffer.LookAheadTextInputStream;
 import net.woggioni.worth.exception.NotImplementedException;
 import net.woggioni.worth.utils.WorthUtils;
@@ -13,6 +11,8 @@ import net.woggioni.worth.value.ArrayValue;
 import net.woggioni.worth.value.ObjectValue;
 import net.woggioni.worth.xface.Parser;
 import net.woggioni.worth.xface.Value;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -186,7 +186,7 @@ public class JSONTest {
     @Test
     @SneakyThrows
     public void consistencyTest() {
-        System.setProperty(ObjectValue.class.getName() + ".preserveKeyOrder", "true");
+        System.setProperty(ObjectValue.class.getName() + ".implementation", "ArrayList");
         for (String testFile : testFiles) {
             Parser parser = new JSONParser();
             Value parsedValue = parser.parse(getTestSource(testFile));

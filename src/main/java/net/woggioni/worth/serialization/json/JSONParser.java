@@ -1,7 +1,6 @@
 package net.woggioni.worth.serialization.json;
 
 import lombok.SneakyThrows;
-import net.woggioni.worth.xface.Value;
 import net.woggioni.worth.buffer.LookAheadTextInputStream;
 import net.woggioni.worth.exception.IOException;
 import net.woggioni.worth.exception.NotImplementedException;
@@ -9,6 +8,7 @@ import net.woggioni.worth.exception.ParseException;
 import net.woggioni.worth.serialization.ValueParser;
 import net.woggioni.worth.utils.WorthUtils;
 import net.woggioni.worth.xface.Parser;
+import net.woggioni.worth.xface.Value;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;

@@ -1,13 +1,13 @@
 package net.woggioni.worth.antlr;
 
 import lombok.SneakyThrows;
+import net.woggioni.worth.serialization.json.JSONDumper;
 import net.woggioni.worth.xface.Value;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Test;
-import net.woggioni.worth.serialization.json.JSONDumper;
 
 import java.io.InputStreamReader;
 

@@ -24,7 +24,7 @@ public abstract class ValueDumper implements Dumper {
     }
 
     protected static class ArrayStackLevel extends StackLevel implements Iterator<Value> {
-        private final Iterator<Value> iterator = value.asArray().iterator();
+        private final Iterator<Value> iterator = ((ArrayValue) value).iterator();
 
         @Override
         public Value next() {
@@ -43,7 +43,7 @@ public abstract class ValueDumper implements Dumper {
     }
 
     protected static class ObjectStackLevel extends StackLevel implements Iterator<Map.Entry<String, Value>> {
-        private final Iterator<Map.Entry<String, Value>> iterator = value.asObject().entrySet().iterator();
+        private final Iterator<Map.Entry<String, Value>> iterator = ((ObjectValue) value).iterator();
 
         @Override
         public Map.Entry<String, Value> next() {
