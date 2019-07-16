@@ -1,6 +1,6 @@
 name := "worth"
 
-organization := "org.oggio88"
+organization := "net.woggioni"
 
 version := "1.0"
 resolvers += Resolver.mavenLocal
@@ -16,7 +16,7 @@ scalacOptions ++= Seq(
 
 git.useGitDescribe := true
 fork := true
-//javaOptions in Test += "-Dorg.oggio88.worth.value.ObjectValue.listBasedImplementation=true"
+//javaOptions in Test += "-Dnet.woggioni.worth.value.ObjectValue.listBasedImplementation=true"
 //javaOptions in Test += "-Xmx14G"
 //scalafmtOnCompile := true
 libraryDependencies += "org.projectlombok" % "lombok" % "1.18.2"
@@ -33,4 +33,4 @@ artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
 
 enablePlugins(Antlr4Plugin)
 antlr4Version in Antlr4 := "4.7.1"
-antlr4PackageName in Antlr4 := Some("org.oggio88.worth.antlr")
+antlr4PackageName in Antlr4 := Some("net.woggioni.worth.antlr")
