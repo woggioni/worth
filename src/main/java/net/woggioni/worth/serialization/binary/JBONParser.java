@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import net.woggioni.worth.buffer.LookAheadInputStream;
 import net.woggioni.worth.exception.ParseException;
 import net.woggioni.worth.serialization.ValueParser;
+import net.woggioni.worth.serialization.json.JSONParser;
 import net.woggioni.worth.utils.Leb128;
 import net.woggioni.worth.utils.WorthUtils;
 import net.woggioni.worth.xface.Parser;
@@ -126,5 +127,17 @@ public class JBONParser extends ValueParser {
 
     public static Parser newInstance() {
         return new JBONParser();
+    }
+
+    public static Parser newInstance(Value.Configuration cfg) {
+        return new JBONParser(cfg);
+    }
+
+    public JBONParser() {
+        super(Value.configuration);
+    }
+
+    public JBONParser(Value.Configuration cfg) {
+        super(cfg);
     }
 }

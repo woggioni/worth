@@ -20,6 +20,18 @@ public class JSONDumper extends ValueDumper {
         return new JSONDumper();
     }
 
+    public static Dumper newInstance(Value.Configuration cfg) {
+        return new JSONDumper(cfg);
+    }
+
+    public JSONDumper() {
+        super(Value.configuration);
+    }
+
+    public JSONDumper(Value.Configuration cfg) {
+        super(cfg);
+    }
+
     private Writer writer;
 
     private String escapeString(String value){

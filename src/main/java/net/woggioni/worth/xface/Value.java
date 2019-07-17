@@ -2,6 +2,7 @@ package net.woggioni.worth.xface;
 
 import net.woggioni.worth.exception.TypeException;
 import net.woggioni.worth.value.NullValue;
+import net.woggioni.worth.value.ObjectValue;
 
 import java.util.List;
 import java.util.Map;
@@ -83,4 +84,12 @@ public interface Value {
     default boolean has(String key) {
         throw new TypeException("Not an object");
     }
+
+    class Configuration {
+        public ObjectValue.Implementation objectValueImplementation = ObjectValue.Implementation.valueOf(
+            System.getProperty(ObjectValue.class.getName() + ".implementation", "TreeMap"));
+        public boolean useReferences = Boolean.valueOf(
+            System.getProperty(Value.class.getName() + ".useReferences", "false"));
+    }
+    Configuration configuration = new Configuration();
 }

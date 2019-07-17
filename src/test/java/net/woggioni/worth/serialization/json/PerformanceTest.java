@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import net.woggioni.worth.antlr.JSONLexer;
 import net.woggioni.worth.antlr.JSONListenerImpl;
+import net.woggioni.worth.serialization.binary.JBONDumper;
+import net.woggioni.worth.xface.Dumper;
+import net.woggioni.worth.xface.Parser;
 import net.woggioni.worth.xface.Value;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -14,9 +17,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.tukaani.xz.XZInputStream;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 
 class Chronometer {
 
@@ -145,6 +146,25 @@ public class PerformanceTest {
             walker.walk(listener, parser.json());
             antlrTime = chr.stop(Chronometer.TimeUnit.SECOND);
             System.out.printf("Antlr time:   %8s sec\n", String.format("%.3f", antlrTime));
+        }
+    }
+
+    @Test
+    @Ignore
+    @SneakyThrows
+    public void tess() {
+        Value value;
+        try(InputStream is = extractTestData()) {
+            Parser parser = JSONParser.newInstance();
+            value = parser.parse(is);
+        }
+        try(OutputStream os = new BufferedOutputStream(new FileOutputStream("/tmp/citylots.json"))) {
+            Dumper dumper = JSONDumper.newInstance();
+            dumper.dump(value, os);
+        }
+        try(OutputStream os = new BufferedOutputStream(new FileOutputStream("/tmp/citylots.jbon"))) {
+            Dumper dumper = JBONDumper.newInstance();
+            dumper.dump(value, os);
         }
     }
 }

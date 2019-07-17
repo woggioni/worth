@@ -3,6 +3,7 @@ package net.woggioni.worth.serialization.binary;
 import lombok.SneakyThrows;
 import net.woggioni.worth.exception.NotImplementedException;
 import net.woggioni.worth.serialization.ValueDumper;
+import net.woggioni.worth.serialization.json.JSONDumper;
 import net.woggioni.worth.utils.Leb128;
 import net.woggioni.worth.utils.WorthUtils;
 import net.woggioni.worth.value.ArrayValue;
@@ -19,6 +20,18 @@ public class JBONDumper extends ValueDumper {
 
     public static Dumper newInstance() {
         return new JBONDumper();
+    }
+
+    public static Dumper newInstance(Value.Configuration cfg) {
+        return new JBONDumper(cfg);
+    }
+
+    public JBONDumper() {
+        super(Value.configuration);
+    }
+
+    public JBONDumper(Value.Configuration cfg) {
+        super(cfg);
     }
 
     protected OutputStream os;

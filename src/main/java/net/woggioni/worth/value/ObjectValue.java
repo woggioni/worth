@@ -9,12 +9,13 @@ import java.util.*;
 
 public interface ObjectValue extends Value, Iterable<Map.Entry<String, Value>> {
 
-    Implementation implementation = Implementation.valueOf(
-            System.getProperty(ObjectValue.class.getName() + ".implementation", "TreeMap"));
-
     static ObjectValue newInstance() {
+        return newInstance(Value.configuration);
+    }
+
+    static ObjectValue newInstance(Configuration cfg) {
         ObjectValue result;
-        switch(implementation) {
+        switch(cfg.objectValueImplementation) {
             case ArrayList:
                 result = new ListObjectValue();
                 break;
@@ -31,7 +32,7 @@ public interface ObjectValue extends Value, Iterable<Map.Entry<String, Value>> {
                 throw WorthUtils.newThrowable(IllegalArgumentException.class,
                     "Unknown value of %s: %s",
                     Implementation.class.getName(),
-                    implementation);
+                    cfg.objectValueImplementation);
         }
         return result;
     }

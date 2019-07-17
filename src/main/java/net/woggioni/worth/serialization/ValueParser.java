@@ -15,6 +15,8 @@ import java.util.ArrayDeque;
 
 public class ValueParser implements Parser {
 
+    protected final Value.Configuration cfg;
+
     @RequiredArgsConstructor
     protected static class StackLevel {
         public final Value value;
@@ -33,12 +35,12 @@ public class ValueParser implements Parser {
     protected static class ObjectStackLevel extends StackLevel {
         public String currentKey;
 
-        public ObjectStackLevel() {
-            super(ObjectValue.newInstance(), -1);
+        public ObjectStackLevel(Value.Configuration cfg) {
+            super(ObjectValue.newInstance(cfg), -1);
         }
 
-        public ObjectStackLevel(long expectedSize) {
-            super(ObjectValue.newInstance(), expectedSize);
+        public ObjectStackLevel(Value.Configuration cfg, long expectedSize) {
+            super(ObjectValue.newInstance(cfg), expectedSize);
         }
     }
 
@@ -57,6 +59,11 @@ public class ValueParser implements Parser {
     }
 
     protected ValueParser() {
+        this(Value.configuration);
+    }
+
+    protected ValueParser(Value.Configuration cfg) {
+        this.cfg = cfg;
         stack = new ArrayDeque<>();
         stack.push(new ArrayStackLevel());
     }
@@ -77,11 +84,11 @@ public class ValueParser implements Parser {
     }
 
     protected void beginObject() {
-        stack.push(new ObjectStackLevel());
+        stack.push(new ObjectStackLevel(cfg));
     }
 
     protected void beginObject(long size) {
-        stack.push(new ObjectStackLevel(size));
+        stack.push(new ObjectStackLevel(cfg, size));
     }
 
 

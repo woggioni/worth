@@ -17,6 +17,8 @@ import java.util.Map;
 
 public abstract class ValueDumper implements Dumper {
 
+    protected final Value.Configuration cfg;
+
     @RequiredArgsConstructor
     protected static class StackLevel {
         public int index = 0;
@@ -64,9 +66,15 @@ public abstract class ValueDumper implements Dumper {
 
     protected ArrayDeque<StackLevel> stack;
 
-    protected ValueDumper() {
+    protected ValueDumper(Value.Configuration cfg) {
+        this.cfg = cfg;
         stack = new ArrayDeque<>();
     }
+
+    protected ValueDumper() {
+        this(Value.configuration);
+    }
+
 
     @Override
     public void dump(Value value, OutputStream stream) {

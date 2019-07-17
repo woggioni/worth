@@ -140,6 +140,17 @@ public class JSONParser extends ValueParser {
     public static Parser newInstance() {
         return new JSONParser();
     }
+    public static Parser newInstance(Value.Configuration cfg) {
+        return new JSONParser(cfg);
+    }
+
+    public JSONParser() {
+        super(Value.configuration);
+    }
+
+    public JSONParser(Value.Configuration cfg) {
+        super(cfg);
+    }
 
     @Override
     public Value parse(InputStream stream) {
