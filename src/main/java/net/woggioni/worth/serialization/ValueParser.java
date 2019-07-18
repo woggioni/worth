@@ -1,6 +1,7 @@
 package net.woggioni.worth.serialization;
 
 import lombok.RequiredArgsConstructor;
+import net.woggioni.worth.exception.MaxDepthExceededException;
 import net.woggioni.worth.exception.NotImplementedException;
 import net.woggioni.worth.utils.WorthUtils;
 import net.woggioni.worth.value.*;
@@ -12,6 +13,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.ArrayDeque;
+
+import static net.woggioni.worth.utils.WorthUtils.newThrowable;
 
 public class ValueParser implements Parser {
 
@@ -64,7 +67,16 @@ public class ValueParser implements Parser {
 
     protected ValueParser(Value.Configuration cfg) {
         this.cfg = cfg;
-        stack = new ArrayDeque<>();
+        stack = new ArrayDeque<>() {
+            @Override
+            public void push(StackLevel stackLevel) {
+                if(size() == cfg.maxDepth) {
+                    throw newThrowable(MaxDepthExceededException.class,
+                        "Objects is too deep, max allowed depth is %d", cfg.maxDepth);
+                }
+                super.push(stackLevel);
+            }
+        };
         stack.push(new ArrayStackLevel());
     }
 

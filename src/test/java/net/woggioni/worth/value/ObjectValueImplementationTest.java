@@ -32,8 +32,9 @@ public class ObjectValueImplementationTest {
         ObjectValue obj = ObjectValue.newInstance();
         Assert.assertEquals(expectedClass, obj.getClass());
         mapping.forEach(tuple -> {
-            Value.Configuration cfg = new Value.Configuration();
-            cfg.objectValueImplementation = tuple._1;
+            Value.Configuration cfg = Value.Configuration.builder()
+                    .objectValueImplementation(tuple._1)
+                    .build();
             ObjectValue obj2 = ObjectValue.newInstance(cfg);
             Assert.assertEquals(tuple._2, obj2.getClass());
         });

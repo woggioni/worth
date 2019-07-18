@@ -1,5 +1,6 @@
 package net.woggioni.worth.xface;
 
+import lombok.Builder;
 import net.woggioni.worth.exception.TypeException;
 import net.woggioni.worth.value.NullValue;
 import net.woggioni.worth.value.ObjectValue;
@@ -85,11 +86,21 @@ public interface Value {
         throw new TypeException("Not an object");
     }
 
+    @Builder
     class Configuration {
-        public ObjectValue.Implementation objectValueImplementation = ObjectValue.Implementation.valueOf(
+
+        @Builder.Default
+        public final ObjectValue.Implementation objectValueImplementation = ObjectValue.Implementation.valueOf(
             System.getProperty(ObjectValue.class.getName() + ".implementation", "TreeMap"));
-        public boolean useReferences = Boolean.valueOf(
+
+        @Builder.Default
+        public final boolean useReferences = Boolean.valueOf(
             System.getProperty(Value.class.getName() + ".useReferences", "false"));
+
+        @Builder.Default
+        public final int maxDepth =
+            Integer.parseInt(System.getProperty(Value.class.getName() + ".maxDepth", "1048576"));
     }
-    Configuration configuration = new Configuration();
+
+    Configuration configuration = Configuration.builder().build();
 }
