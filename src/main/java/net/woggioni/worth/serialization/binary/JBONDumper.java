@@ -116,7 +116,6 @@ public class JBONDumper extends ValueDumper {
     }
 
     @Override
-    @SneakyThrows
     protected void endObject() {
     }
 
@@ -134,7 +133,6 @@ public class JBONDumper extends ValueDumper {
     }
 
     @Override
-    @SneakyThrows
     protected void endArray() {
     }
 

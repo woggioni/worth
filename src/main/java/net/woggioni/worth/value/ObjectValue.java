@@ -47,6 +47,7 @@ public interface ObjectValue extends Value, Iterable<Map.Entry<String, Value>> {
     }
 }
 
+@EqualsAndHashCode
 final class ObjectEntry<K, V> implements Map.Entry<K, V> {
     private final K key;
     private V value;
@@ -130,7 +131,7 @@ abstract class MapObjectValue implements ObjectValue {
     }
 }
 
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 class HashMapObjectValue extends MapObjectValue {
 
     public HashMapObjectValue() {
@@ -138,7 +139,7 @@ class HashMapObjectValue extends MapObjectValue {
     }
 }
 
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 class LinkedHashMapObjectValue extends MapObjectValue {
 
     public LinkedHashMapObjectValue() {
@@ -146,7 +147,7 @@ class LinkedHashMapObjectValue extends MapObjectValue {
     }
 }
 
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 class TreeMapObjectValue extends MapObjectValue {
 
     public TreeMapObjectValue() {
@@ -159,6 +160,7 @@ class TreeMapObjectValue extends MapObjectValue {
 @EqualsAndHashCode
 class ListObjectValue implements ObjectValue {
 
+    @EqualsAndHashCode.Include
     private final List<Map.Entry<String, Value>> value = new ArrayList<>();
 
     public ListObjectValue(Map<String, Value> map) {

@@ -25,8 +25,8 @@ public class JSONTest {
 
     private String[] testFiles = new String[]{"/test.json", "/wordpress.json"};
 
-    private InputStream getTestSource(String filename) {
-        return getClass().getResourceAsStream(filename);
+    public static InputStream getTestSource(String filename) {
+        return JSONTest.class.getResourceAsStream(filename);
     }
 
     private boolean compareValueAndJsonNode(Value value, JsonNode jsonNode) {
@@ -186,16 +186,17 @@ public class JSONTest {
     @Test
     @SneakyThrows
     public void consistencyTest() {
-        System.setProperty(ObjectValue.class.getName() + ".implementation", "ArrayList");
+        Value.Configuration cfg = Value.Configuration.builder()
+            .objectValueImplementation(ObjectValue.Implementation.ArrayList).build();
         for (String testFile : testFiles) {
-            Parser parser = new JSONParser();
+            Parser parser = new JSONParser(cfg);
             Value parsedValue = parser.parse(getTestSource(testFile));
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             JSONDumper.newInstance().dump(parsedValue, baos);
             String dumpedJSON = new String(baos.toByteArray());
             byte[] barray = baos.toByteArray();
             ByteArrayInputStream bais = new ByteArrayInputStream(barray);
-            parser = new JSONParser();
+            parser = new JSONParser(cfg);
             Value reParsedValue = parser.parse(bais);
             Assert.assertEquals(parsedValue, reParsedValue);
             baos = new ByteArrayOutputStream();

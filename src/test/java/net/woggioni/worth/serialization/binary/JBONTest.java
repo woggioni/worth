@@ -26,11 +26,12 @@ public class JBONTest {
     @Test
     @SneakyThrows
     public void consistencyTest() {
-        System.setProperty(ObjectValue.class.getName() + ".implementation", "TreeMap");
+        Value.Configuration cfg = Value.Configuration.builder()
+            .objectValueImplementation(ObjectValue.Implementation.TreeMap).build();
         for (String testFile : testFiles) {
             Value parsedValue;
             try(InputStream is = getTestSource(testFile)) {
-                Parser parser = new JSONParser();
+                Parser parser = new JSONParser(cfg);
                 parsedValue = parser.parse(is);
             }
             byte[] dumpedJBON;
@@ -40,7 +41,7 @@ public class JBONTest {
             }
             Value reParsedValue;
             try(InputStream is = new ByteArrayInputStream(dumpedJBON)) {
-                Parser parser = new JBONParser();
+                Parser parser = new JBONParser(cfg);
                 reParsedValue = parser.parse(is);
             }
             Assert.assertEquals(parsedValue, reParsedValue);

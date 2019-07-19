@@ -23,10 +23,8 @@ public class ObjectValueImplementationTest {
     public void test() {
         List<Tuple2<ObjectValue.Implementation, Class<? extends ObjectValue>>> mapping =
             getImplementationMapping();
-        System.setProperty(ObjectValue.class.getName() + ".implementation",
-            ObjectValue.Implementation.ArrayList.toString());
         ObjectValue.Implementation expectedImplementation =
-            ObjectValue.Implementation.valueOf(System.getProperty(ObjectValue.class.getName() + ".implementation"));
+            ObjectValue.Implementation.valueOf(System.getProperty(ObjectValue.class.getName() + ".implementation", "TreeMap"));
         Class<? extends ObjectValue> expectedClass =
             mapping.stream().filter(t -> t._1 == expectedImplementation).findFirst().get()._2;
         ObjectValue obj = ObjectValue.newInstance();
