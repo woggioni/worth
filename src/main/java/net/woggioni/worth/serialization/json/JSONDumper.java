@@ -2,17 +2,21 @@ package net.woggioni.worth.serialization.json;
 
 import lombok.SneakyThrows;
 import net.woggioni.worth.serialization.ValueDumper;
+import net.woggioni.worth.traversal.ValueIdentity;
 import net.woggioni.worth.utils.WorthUtils;
-import net.woggioni.worth.value.ArrayValue;
-import net.woggioni.worth.value.ObjectValue;
+import net.woggioni.worth.value.*;
 import net.woggioni.worth.xface.Dumper;
 import net.woggioni.worth.xface.Value;
 
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class JSONDumper extends ValueDumper {
 
@@ -73,8 +77,18 @@ public class JSONDumper extends ValueDumper {
     @Override
     @SneakyThrows
     public void dump(Value value, Writer writer) {
+        Map<ValueIdentity, Integer> ids;
+        Set<Integer> dumpedId;
+        if(cfg.serializeReferences) {
+            ids = getIdMap(value);
+            dumpedId = new HashSet<>();
+        } else {
+            ids = null;
+            dumpedId = null;
+        }
         this.writer = writer;
         final Consumer<Value> handle_value = (v) -> {
+            Integer id;
             switch (v.type()) {
                 case NULL:
                     nullValue();
@@ -93,13 +107,33 @@ public class JSONDumper extends ValueDumper {
                     break;
                 case ARRAY:
                     ArrayValue arrayValue = WorthUtils.dynamicCast(v, ArrayValue.class);
-                    stack.push(new ArrayStackLevel(arrayValue));
-                    beginArray(arrayValue.size());
+                    if(ids != null && (id = ids.get(new ValueIdentity(arrayValue))) != null) {
+                        if(dumpedId.add(id)) {
+                            stack.push(new ArrayStackLevel(arrayValue));
+                            valueId(id);
+                            beginArray(arrayValue.size());
+                        } else {
+                            valueReference(id);
+                        }
+                    } else {
+                        stack.push(new ArrayStackLevel(arrayValue));
+                        beginArray(arrayValue.size());
+                    }
                     break;
                 case OBJECT:
                     ObjectValue objectValue = WorthUtils.dynamicCast(v, ObjectValue.class);
-                    stack.push(new ObjectStackLevel(WorthUtils.dynamicCast(v, ObjectValue.class)));
-                    beginObject(objectValue.size());
+                    if(ids != null && (id = ids.get(new ValueIdentity(objectValue))) != null) {
+                        if(dumpedId.add(id)) {
+                            stack.push(new ObjectStackLevel(WorthUtils.dynamicCast(v, ObjectValue.class)));
+                            valueId(id);
+                            beginObject(objectValue.size());
+                        } else {
+                            valueReference(id);
+                        }
+                    } else {
+                        stack.push(new ObjectStackLevel(WorthUtils.dynamicCast(v, ObjectValue.class)));
+                        beginObject(objectValue.size());
+                    }
                     break;
             }
         };
@@ -196,5 +230,17 @@ public class JSONDumper extends ValueDumper {
     @SneakyThrows
     protected void nullValue() {
         this.writer.write("null");
+    }
+
+    @Override
+    @SneakyThrows
+    protected void valueId(int id) {
+        this.writer.write("(" + id + ")");
+    }
+
+    @Override
+    @SneakyThrows
+    protected void valueReference(int id) {
+        this.writer.write("$" + id);
     }
 }

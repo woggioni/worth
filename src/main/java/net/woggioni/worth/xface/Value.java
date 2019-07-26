@@ -100,6 +100,11 @@ public interface Value {
         @Builder.Default
         public final int maxDepth =
             Integer.parseInt(System.getProperty(Value.class.getName() + ".maxDepth", "1048576"));
+
+        @Builder.Default
+        public final boolean serializeReferences =
+            Boolean.parseBoolean(System.getProperty(
+            Value.class.getName() + ".serializeReferences", "false"));
     }
 
     Configuration configuration = Configuration.builder().build();

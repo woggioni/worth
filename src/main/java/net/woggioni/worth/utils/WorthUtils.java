@@ -5,6 +5,8 @@ import net.woggioni.worth.xface.Value;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -27,20 +29,27 @@ public class WorthUtils {
     }
 
     public static void writeObject2File(String fileName, Object o) {
-        writeObject2File(new File(fileName), o);
+        writeObject2File(Paths.get(fileName), o);
     }
 
     @SneakyThrows
-    public static void writeObject2File(File file, Object o) {
-        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file.getPath()))) {
+    public static void writeObject2File(Path file, Object o) {
+        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file.toString()))) {
             writer.write(o.toString());
         }
     }
 
     @SneakyThrows
-    public static String readFile2String(File file) {
+    public static void writeBytes2File(Path file, byte[] bytes) {
+        try (OutputStream os = new FileOutputStream(file.toString())) {
+            os.write(bytes);
+        }
+    }
+
+    @SneakyThrows
+    public static String readFile2String(Path file) {
         StringBuilder builder = new StringBuilder();
-        try (Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(file.getPath())))) {
+        try (Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(file.toString())))) {
             char[] buffer = new char[1024];
             while (true) {
                 int read = reader.read(buffer);

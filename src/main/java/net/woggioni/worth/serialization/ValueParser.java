@@ -3,6 +3,7 @@ package net.woggioni.worth.serialization;
 import lombok.RequiredArgsConstructor;
 import net.woggioni.worth.exception.MaxDepthExceededException;
 import net.woggioni.worth.exception.NotImplementedException;
+import net.woggioni.worth.exception.ParseException;
 import net.woggioni.worth.utils.WorthUtils;
 import net.woggioni.worth.value.*;
 import net.woggioni.worth.xface.Parser;
@@ -11,8 +12,12 @@ import net.woggioni.worth.xface.Value;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.reflect.Array;
 import java.nio.charset.Charset;
 import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 
 import static net.woggioni.worth.utils.WorthUtils.newThrowable;
 
@@ -27,9 +32,6 @@ public class ValueParser implements Parser {
     }
 
     protected static class ArrayStackLevel extends StackLevel {
-        public ArrayStackLevel() {
-            super(new ArrayValue(), -1);
-        }
         public ArrayStackLevel(long expectedSize) {
             super(new ArrayValue(), expectedSize);
         }
@@ -38,16 +40,13 @@ public class ValueParser implements Parser {
     protected static class ObjectStackLevel extends StackLevel {
         public String currentKey;
 
-        public ObjectStackLevel(Value.Configuration cfg) {
-            super(ObjectValue.newInstance(cfg), -1);
-        }
-
         public ObjectStackLevel(Value.Configuration cfg, long expectedSize) {
             super(ObjectValue.newInstance(cfg), expectedSize);
         }
     }
 
     protected ArrayDeque<StackLevel> stack;
+    protected Map<Integer, Value> idMap;
 
     private void add2Last(Value value) {
         StackLevel last = stack.getFirst();
@@ -67,17 +66,20 @@ public class ValueParser implements Parser {
 
     protected ValueParser(Value.Configuration cfg) {
         this.cfg = cfg;
+        if (cfg.serializeReferences) {
+            idMap = new HashMap<>();
+        }
         stack = new ArrayDeque<>() {
             @Override
             public void push(StackLevel stackLevel) {
-                if(size() == cfg.maxDepth) {
+                if (size() == cfg.maxDepth) {
                     throw newThrowable(MaxDepthExceededException.class,
-                        "Objects is too deep, max allowed depth is %d", cfg.maxDepth);
+                            "Objects is too deep, max allowed depth is %d", cfg.maxDepth);
                 }
                 super.push(stackLevel);
             }
         };
-        stack.push(new ArrayStackLevel());
+        stack.push(new ArrayStackLevel(-1));
     }
 
     @Override
@@ -95,29 +97,40 @@ public class ValueParser implements Parser {
         return parse(new InputStreamReader(stream, encoding));
     }
 
-    protected void beginObject() {
-        stack.push(new ObjectStackLevel(cfg));
+    protected Value beginObject() {
+        return beginObject(-1);
     }
 
-    protected void beginObject(long size) {
-        stack.push(new ObjectStackLevel(cfg, size));
+    protected Value beginObject(long size) {
+        ObjectStackLevel osl = new ObjectStackLevel(cfg, size);
+        stack.push(osl);
+        return osl.value;
     }
-
 
     protected void endObject() {
-        add2Last(stack.pop().value);
+        ValueParser.StackLevel sl = stack.pop();
+        if(!(sl instanceof ValueParser.ObjectStackLevel)) {
+            error(ParseException::new, "Unexpected object terminator");
+        }
+        add2Last(sl.value);
     }
 
-    protected void beginArray() {
-        stack.push(new ArrayStackLevel());
+    protected Value beginArray() {
+        return beginArray(-1);
     }
 
-    protected void beginArray(long size) {
-        stack.push(new ArrayStackLevel(size));
+    protected Value beginArray(long size) {
+        ArrayStackLevel ale = new ArrayStackLevel(size);
+        stack.push(ale);
+        return ale.value;
     }
 
     protected void endArray() {
-        add2Last(stack.pop().value);
+        ValueParser.StackLevel sl = stack.pop();
+        if(!(sl instanceof ValueParser.ArrayStackLevel)) {
+            error(ParseException::new, "Unexpected array terminator");
+        }
+        add2Last(sl.value);
     }
 
     protected void objectKey(String key) {
@@ -143,5 +156,21 @@ public class ValueParser implements Parser {
 
     protected void nullValue() {
         add2Last(Value.Null);
+    }
+
+    protected void valueId(int id, Value value) {
+        idMap.put(id, value);
+    }
+
+    protected void valueReference(int id) {
+        Value referencedValue = idMap.get(id);
+        if (referencedValue == null) {
+            error(ParseException::new, "got invalid id '%d'", id);
+        }
+        add2Last(referencedValue);
+    }
+
+    protected <T extends RuntimeException> T error(Function<String, T> constructor, String fmt, Object... args) {
+        throw new NotImplementedException("Method not implemented");
     }
 }

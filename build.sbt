@@ -26,10 +26,6 @@ libraryDependencies += "org.antlr" % "antlr4" % "4.7.1" % Test
 libraryDependencies += "org.antlr" % "antlr4-runtime" % "4.7.1" % Test
 libraryDependencies += "org.tukaani" % "xz" % "1.8" % Test
 
-artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
-  artifact.name + "-" + module.revision + "." + artifact.extension
-}
-
 enablePlugins(Antlr4Plugin)
 antlr4Version in Antlr4 := "4.7.1"
 antlr4PackageName in Antlr4 := Some("net.woggioni.worth.antlr")

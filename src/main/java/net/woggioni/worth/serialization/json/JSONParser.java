@@ -48,7 +48,7 @@ public class JSONParser extends ValueParser {
         return result;
     }
 
-    private final void parseNumber(LookAheadTextInputStream stream) {
+    private final String parseNumber(LookAheadTextInputStream stream) {
         StringBuilder sb = new StringBuilder();
         while (true) {
             int b = stream.getCurrentByte();
@@ -61,12 +61,31 @@ public class JSONParser extends ValueParser {
             }
             stream.read();
         }
-        String text = sb.toString();
-        if (text.indexOf('.') > 0) {
-            floatValue(Double.valueOf(text));
-        } else {
-            integerValue(Long.valueOf(text));
+        return sb.toString();
+    }
+
+    private final int parseId(LookAheadTextInputStream stream) {
+        StringBuilder sb = new StringBuilder();
+        boolean digitsStarted = false;
+        boolean digitsEnded = false;
+        while (true) {
+            int b = stream.getCurrentByte();
+            if(b == '(' ) {
+            } else if(Character.isWhitespace(b)) {
+                if(digitsStarted) digitsEnded = true;
+            } else if (b < 0 || b == ')') {
+                break;
+            } else if (isDecimal(b)) {
+                if(digitsEnded) {
+                    error(ParseException::new, "error parsing id");
+                } else {
+                    digitsStarted = true;
+                    sb.appendCodePoint(b);
+                }
+            }
+            stream.read();
         }
+        return Integer.valueOf(sb.toString());
     }
 
     private String readString(LookAheadTextInputStream stream) {
@@ -131,10 +150,10 @@ public class JSONParser extends ValueParser {
         }
     }
 
-    private <T extends RuntimeException> T error(Function<String, T> constructor, String fmt, Object... args) {
-        return constructor.apply(
-                String.format("Error at line %d column %d: %s",
-                        currentLine, currentColumn, String.format(fmt, args)));
+    @Override
+    protected <T extends RuntimeException> T error(Function<String, T> constructor, String fmt, Object ...args) {
+        return constructor.apply(String.format("Error at line %d column %d: %s",
+            currentLine, currentColumn, String.format(fmt, args)));
     }
 
     public static Parser newInstance() {
@@ -175,22 +194,34 @@ public class JSONParser extends ValueParser {
         };
 
         try {
+            Integer currentId = null;
             while (true) {
                 int c = stream.getCurrentByte();
                 if (c == -1) {
                     break;
                 } else if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
+                } else if (c == '(') {
+                    currentId = parseId(stream);
                 } else if (c == '{') {
-                    beginObject();
+                    Value newObject = beginObject();
+                    if(currentId != null) valueId(currentId, newObject);
+                    currentId = null;
                 } else if (c == '}') {
                     endObject();
                 } else if (c == '[') {
-                    beginArray();
+                    Value newArray = beginArray();
+                    if(currentId != null) valueId(currentId, newArray);
+                    currentId = null;
                 } else if (c == ']') {
                     endArray();
                 } else if (isDecimal(c)) {
                     try {
-                        parseNumber(stream);
+                        String text = parseNumber(stream);
+                        if (text.indexOf('.') > 0) {
+                            floatValue(Double.valueOf(text));
+                        } else {
+                            integerValue(Long.valueOf(text));
+                        }
                         continue;
                     } catch (NumberFormatException nfe) {
                         throw error(ParseException::new, nfe.getMessage());
@@ -212,6 +243,11 @@ public class JSONParser extends ValueParser {
                 } else if (c == 'n') {
                     consumeExpected(stream, "null", "Unrecognized null value");
                     nullValue();
+                } else if (idMap != null && c == '$') {
+                    stream.read();
+                    String text = parseNumber(stream);
+                    valueReference(Integer.valueOf(text));
+                    continue;
                 }
                 stream.read();
             }

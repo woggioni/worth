@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import net.woggioni.worth.exception.NotImplementedException;
 import net.woggioni.worth.serialization.ValueDumper;
 import net.woggioni.worth.serialization.json.JSONDumper;
+import net.woggioni.worth.traversal.ValueIdentity;
 import net.woggioni.worth.utils.Leb128;
 import net.woggioni.worth.utils.WorthUtils;
 import net.woggioni.worth.value.ArrayValue;
@@ -13,7 +14,9 @@ import net.woggioni.worth.xface.Value;
 
 import java.io.OutputStream;
 import java.io.Writer;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class JBONDumper extends ValueDumper {
@@ -44,8 +47,18 @@ public class JBONDumper extends ValueDumper {
     @Override
     @SneakyThrows
     public void dump(Value value, OutputStream outputStream) {
+        Map<ValueIdentity, Integer> ids;
+        Set<Integer> dumpedId;
+        if(cfg.serializeReferences) {
+            ids = getIdMap(value);
+            dumpedId = new HashSet<>();
+        } else {
+            ids = null;
+            dumpedId = null;
+        }
         this.os = outputStream;
         final Consumer<Value> handle_value = (v) -> {
+            Integer id;
             switch (v.type()) {
                 case NULL:
                     nullValue();
@@ -64,13 +77,33 @@ public class JBONDumper extends ValueDumper {
                     break;
                 case ARRAY:
                     ArrayValue arrayValue = WorthUtils.dynamicCast(v, ArrayValue.class);
-                    stack.push(new ArrayStackLevel(arrayValue));
-                    beginArray(arrayValue.size());
+                    if(ids != null && (id = ids.get(new ValueIdentity(arrayValue))) != null) {
+                        if(dumpedId.add(id)) {
+                            stack.push(new ArrayStackLevel(arrayValue));
+                            valueId(id);
+                            beginArray(arrayValue.size());
+                        } else {
+                            valueReference(id);
+                        }
+                    } else {
+                        stack.push(new ArrayStackLevel(arrayValue));
+                        beginArray(arrayValue.size());
+                    }
                     break;
                 case OBJECT:
                     ObjectValue objectValue = WorthUtils.dynamicCast(v, ObjectValue.class);
-                    stack.push(new ObjectStackLevel(objectValue));
-                    beginObject(objectValue.size());
+                    if(ids != null && (id = ids.get(new ValueIdentity(objectValue))) != null) {
+                        if(dumpedId.add(id)) {
+                                stack.push(new ObjectStackLevel(WorthUtils.dynamicCast(v, ObjectValue.class)));
+                                valueId(id);
+                                beginObject(objectValue.size());
+                            } else {
+                                valueReference(id);
+                            }
+                    } else {
+                        stack.push(new ObjectStackLevel(WorthUtils.dynamicCast(v, ObjectValue.class)));
+                        beginObject(objectValue.size());
+                    }
                     break;
             }
         };
@@ -190,5 +223,19 @@ public class JBONDumper extends ValueDumper {
     @SneakyThrows
     protected void nullValue() {
         os.write(BinaryMarker.Null.value);
+    }
+
+    @Override
+    @SneakyThrows
+    protected void valueReference(int id) {
+        os.write(BinaryMarker.Reference.value);
+        Leb128.encode(os, id);
+    }
+
+    @Override
+    @SneakyThrows
+    protected void valueId(int id) {
+        os.write(BinaryMarker.Id.value);
+        Leb128.encode(os, id);
     }
 }

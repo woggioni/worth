@@ -108,28 +108,30 @@ public class ValueWalker {
         stack.add(ase);
         while(true) {
             Value currentValue = stack.get(stack.size() - 1).next();
-            if((av = dynamicCast(currentValue, ArrayValue.class)) != null) {
-                ase = new ArrayStackElement(av);
-                stack.add(ase);
-            } else if((ov = dynamicCast(currentValue, ObjectValue.class)) != null) {
-                ObjectStackElement ose = new ObjectStackElement(ov);
-                stack.add(ose);
-            } else {
-                IntegerValue iv;
-                BooleanValue bv;
-                NullValue nv;
-                FloatValue fv;
-                StringValue sv;
-                if((iv = dynamicCast(currentValue, IntegerValue.class)) != null) {
-                    visitor.visit(iv, ctx);
-                } else if((fv = dynamicCast(currentValue, FloatValue.class)) != null) {
-                    visitor.visit(fv, ctx);
-                } else if((bv = dynamicCast(currentValue, BooleanValue.class)) != null) {
-                    visitor.visit(bv, ctx);
-                } else if ((sv = dynamicCast(currentValue, StringValue.class)) != null) {
-                    visitor.visit(sv, ctx);
-                } else if ((nv = dynamicCast(currentValue, NullValue.class)) != null) {
-                    visitor.visit(nv, ctx);
+            if(visitor.filter(currentValue, ctx)) {
+                if ((av = dynamicCast(currentValue, ArrayValue.class)) != null) {
+                    ase = new ArrayStackElement(av);
+                    stack.add(ase);
+                } else if ((ov = dynamicCast(currentValue, ObjectValue.class)) != null) {
+                    ObjectStackElement ose = new ObjectStackElement(ov);
+                    stack.add(ose);
+                } else {
+                    IntegerValue iv;
+                    BooleanValue bv;
+                    NullValue nv;
+                    FloatValue fv;
+                    StringValue sv;
+                    if ((iv = dynamicCast(currentValue, IntegerValue.class)) != null) {
+                        visitor.visit(iv, ctx);
+                    } else if ((fv = dynamicCast(currentValue, FloatValue.class)) != null) {
+                        visitor.visit(fv, ctx);
+                    } else if ((bv = dynamicCast(currentValue, BooleanValue.class)) != null) {
+                        visitor.visit(bv, ctx);
+                    } else if ((sv = dynamicCast(currentValue, StringValue.class)) != null) {
+                        visitor.visit(sv, ctx);
+                    } else if ((nv = dynamicCast(currentValue, NullValue.class)) != null) {
+                        visitor.visit(nv, ctx);
+                    }
                 }
             }
             while(true) {

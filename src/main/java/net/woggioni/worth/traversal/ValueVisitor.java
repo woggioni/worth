@@ -1,14 +1,16 @@
 package net.woggioni.worth.traversal;
 
 import net.woggioni.worth.value.*;
+import net.woggioni.worth.xface.Value;
 
 public interface ValueVisitor {
 
-    void visit(ObjectValue value, TraversalContext ctx);
-    void visit(ArrayValue value, TraversalContext ctx);
-    void visit(BooleanValue value, TraversalContext ctx);
-    void visit(StringValue value, TraversalContext ctx);
-    void visit(IntegerValue value, TraversalContext ctx);
-    void visit(FloatValue value, TraversalContext ctx);
-    void visit(NullValue value, TraversalContext ctx);
+    default void visit(ObjectValue value, TraversalContext ctx) {}
+    default void visit(ArrayValue value, TraversalContext ctx) {}
+    default void visit(BooleanValue value, TraversalContext ctx) {}
+    default void visit(StringValue value, TraversalContext ctx) {}
+    default void visit(IntegerValue value, TraversalContext ctx) {}
+    default void visit(FloatValue value, TraversalContext ctx) {}
+    default void visit(NullValue value, TraversalContext ctx) {}
+    default boolean filter(Value value, TraversalContext ctx) { return true; }
 }

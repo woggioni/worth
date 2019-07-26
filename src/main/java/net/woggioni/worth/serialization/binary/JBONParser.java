@@ -18,7 +18,8 @@ public class JBONParser extends ValueParser {
     private int cursor = 0;
 
 
-    private <T extends RuntimeException> T error(Function<String, T> constructor, String fmt, Object... args) {
+    @Override
+    protected  <T extends RuntimeException> T error(Function<String, T> constructor, String fmt, Object... args) {
         return constructor.apply(
                 String.format("Error at position %d: %s",
                         cursor, String.format(fmt, args)));
@@ -38,6 +39,7 @@ public class JBONParser extends ValueParser {
         stream.read();
 
         try {
+            Integer currentId = null;
             Leb128.Leb128Decoder decoder = new Leb128.Leb128Decoder(stream);
             ObjectStackLevel osl;
             while (true) {
@@ -52,7 +54,11 @@ public class JBONParser extends ValueParser {
                 if(c == -1) {
                     break;
                 }
-                if(c == BinaryMarker.Null.value) {
+                if(idMap != null && c == BinaryMarker.Id.value) {
+                    currentId = (int) decoder.decode();
+                } else if(idMap != null && c == BinaryMarker.Reference.value) {
+                    valueReference((int) decoder.decode());
+                } else if(c == BinaryMarker.Null.value) {
                     nullValue();
                 } else if(c == BinaryMarker.True.value) {
                     booleanValue(true);
@@ -75,17 +81,26 @@ public class JBONParser extends ValueParser {
                     stream.read(buffer);
                     String text = new String(buffer);
                     stringValue(text);
-                } else if(c == BinaryMarker.EmptyArray.value) {
-                    beginArray(0);
-                } else if(c > BinaryMarker.EmptyArray.value && c < BinaryMarker.LargeArray.value) {
-                    beginArray(c - BinaryMarker.EmptyArray.value);
-                } else if(c == BinaryMarker.LargeArray.value) {
-                    long size = decoder.decode();
-                    beginArray(size);
-                } else if(c == BinaryMarker.EmptyObject.value) {
-                    beginObject(0);
-                } else if(c > BinaryMarker.EmptyObject.value && c < BinaryMarker.LargeObject.value) {
-                    beginObject(c - BinaryMarker.EmptyObject.value);
+                } else if(c >= BinaryMarker.EmptyArray.value && c <= BinaryMarker.LargeArray.value) {
+                    long size;
+                    if(c == BinaryMarker.LargeArray.value) {
+                        size = decoder.decode();
+                    } else {
+                        size = c - BinaryMarker.EmptyArray.value;
+                    }
+                    Value newArray = beginArray(size);
+                    if(currentId != null) valueId(currentId, newArray);
+                    currentId = null;
+                } else if(c >= BinaryMarker.EmptyObject.value && c <= BinaryMarker.LargeObject.value) {
+                    long size;
+                    if(c == BinaryMarker.LargeObject.value) {
+                        size = decoder.decode();
+                    } else {
+                        size = c - BinaryMarker.EmptyObject.value;
+                    }
+                    Value newObject = beginObject(size);
+                    if(currentId != null) valueId(currentId, newObject);
+                    currentId = null;
                 } else if(c == BinaryMarker.LargeObject.value) {
                     long size = decoder.decode();
                     beginObject(size);

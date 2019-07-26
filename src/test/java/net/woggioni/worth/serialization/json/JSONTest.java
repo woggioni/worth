@@ -8,7 +8,9 @@ import net.woggioni.worth.buffer.LookAheadTextInputStream;
 import net.woggioni.worth.exception.NotImplementedException;
 import net.woggioni.worth.utils.WorthUtils;
 import net.woggioni.worth.value.ArrayValue;
+import net.woggioni.worth.value.IntegerValue;
 import net.woggioni.worth.value.ObjectValue;
+import net.woggioni.worth.xface.Dumper;
 import net.woggioni.worth.xface.Parser;
 import net.woggioni.worth.xface.Value;
 import org.junit.Assert;
@@ -20,6 +22,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Objects;
 
 public class JSONTest {
 
