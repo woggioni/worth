@@ -59,4 +59,13 @@ public class ReferenceTest {
     public void jbon() {
         common(JBONDumper::new, JBONParser::new);
     }
+
+    @Test
+    public void test() {
+        Value.Configuration cfg = Value.Configuration.builder().serializeReferences(true).build();
+        Value root = ObjectValue.newInstance(cfg);
+        root.put("child1", root);
+        root.put("child2", ObjectValue.newInstance(cfg));
+        new JSONDumper(cfg).dump(root, System.out);
+    }
 }

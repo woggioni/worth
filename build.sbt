@@ -19,15 +19,27 @@ fork := true
 //javaOptions in Test += "-Xmx14G"
 //scalafmtOnCompile := true
 libraryDependencies += "org.projectlombok" % "lombok" % "1.18.8"
-libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test
-libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.9.6" % Test
 
-libraryDependencies += "org.antlr" % "antlr4" % "4.7.1" % Test
-libraryDependencies += "org.antlr" % "antlr4-runtime" % "4.7.1" % Test
-libraryDependencies += "org.tukaani" % "xz" % "1.8" % Test
-
-enablePlugins(Antlr4Plugin)
-antlr4Version in Antlr4 := "4.7.1"
-antlr4PackageName in Antlr4 := Some("net.woggioni.worth.antlr")
-
+val testDependencies = Seq("com.novocode" % "junit-interface" % "0.11" % Test,
+                           "com.fasterxml.jackson.core" % "jackson-databind" % "2.9.6" % Test,
+                           "org.tukaani" % "xz" % "1.8" % Test)
+libraryDependencies ++= testDependencies
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-q", "-a")
+
+val antlrVersion = "4.7.2"
+lazy val worthAntlr = (project in file("antlr")).settings(
+    organization := (organization in LocalRootProject).value,
+    name := "worth-antlr",
+    version := (version in LocalRootProject).value,
+//    mainClass := Some("com.jlevtree.benchmark.Benchmark"),
+//    mappings in packageBin in Compile ++= (mappings in(LocalRootProject, Compile, packageBin)).value,
+    resourceDirectory := (resourceDirectory in(LocalRootProject, Test)).value,
+    antlr4Version in Antlr4 := antlrVersion,
+    antlr4PackageName in Antlr4 := Some("net.woggioni.worth.antlr"),
+    skip in publish := true,
+    unmanagedClasspath in Test += (classDirectory in (LocalRootProject, Test)).value,
+    libraryDependencies += "org.antlr" % "antlr4" % antlrVersion % Compile,
+    libraryDependencies += "org.antlr" % "antlr4-runtime" % antlrVersion,
+    libraryDependencies += "org.projectlombok" % "lombok" % "1.18.8",
+    libraryDependencies ++= testDependencies
+).dependsOn(LocalRootProject).enablePlugins(Antlr4Plugin)
