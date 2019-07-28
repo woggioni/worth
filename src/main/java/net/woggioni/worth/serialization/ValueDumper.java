@@ -6,7 +6,8 @@ import net.woggioni.worth.traversal.TraversalContext;
 import net.woggioni.worth.traversal.ValueIdentity;
 import net.woggioni.worth.traversal.ValueVisitor;
 import net.woggioni.worth.traversal.ValueWalker;
-import net.woggioni.worth.value.*;
+import net.woggioni.worth.value.ArrayValue;
+import net.woggioni.worth.value.ObjectValue;
 import net.woggioni.worth.xface.Dumper;
 import net.woggioni.worth.xface.Value;
 
@@ -14,9 +15,10 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public abstract class ValueDumper implements Dumper {
 
@@ -31,13 +33,6 @@ public abstract class ValueDumper implements Dumper {
     protected Map<ValueIdentity, Integer> getIdMap(Value root) {
         Map<ValueIdentity, Integer> occurrencies = new HashMap<>();
         ValueVisitor visitor = new ValueVisitor(){
-
-            private void visit(Value v) {
-                ValueIdentity identity = new ValueIdentity(v);
-                Integer i = occurrencies.getOrDefault(identity, 0);
-                occurrencies.put(identity, ++i);
-            }
-
             @Override
             public boolean filter(Value value, TraversalContext ctx) {
                 if(value.type() == Value.Type.ARRAY || value.type() == Value.Type.OBJECT) {
@@ -49,22 +44,14 @@ public abstract class ValueDumper implements Dumper {
                     return true;
                 }
             }
-
-            @Override
-            public void visit(ObjectValue value, TraversalContext ctx) {
-                visit(value);
-            }
-
-            @Override
-            public void visit(ArrayValue value, TraversalContext ctx) {
-                visit(value);
-            }
         };
         ValueWalker.walk(root, visitor);
         Map<ValueIdentity, Integer> result = new HashMap<>();
         int i = 0;
-        for(ValueIdentity identity : occurrencies.keySet()) {
-            result.put(identity, i++);
+        for(Map.Entry<ValueIdentity, Integer> entry : occurrencies.entrySet()) {
+            if(entry.getValue() > 1) {
+                result.put(entry.getKey(), i++);
+            }
         }
         return result;
     }
