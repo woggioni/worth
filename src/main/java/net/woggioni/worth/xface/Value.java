@@ -34,11 +34,11 @@ public interface Value {
         throw new TypeException("Not a String");
     }
 
-    default List<Value> asArray() {
+    default Iterable<Value> asArray() {
         throw new TypeException("Not an array");
     }
 
-    default Map<String, Value> asObject() {
+    default Iterable<Map.Entry<String, Value>> asObject() {
         throw new TypeException("Not an object");
     }
 
@@ -47,6 +47,10 @@ public interface Value {
     }
 
     default void add(Value value) {
+        throw new TypeException("Not an array");
+    }
+
+    default void set(int index, Value value) {
         throw new TypeException("Not an array");
     }
 

@@ -106,33 +106,31 @@ public class JSONDumper extends ValueDumper {
                     stringValue(v.asString());
                     break;
                 case ARRAY:
-                    ArrayValue arrayValue = WorthUtils.dynamicCast(v, ArrayValue.class);
-                    if(ids != null && (id = ids.get(new ValueIdentity(arrayValue))) != null) {
+                    if(ids != null && (id = ids.get(new ValueIdentity(v))) != null) {
                         if(dumpedId.add(id)) {
-                            stack.push(new ArrayStackLevel(arrayValue));
+                            stack.push(new ArrayStackLevel(v));
                             valueId(id);
-                            beginArray(arrayValue.size());
+                            beginArray(v.size());
                         } else {
                             valueReference(id);
                         }
                     } else {
-                        stack.push(new ArrayStackLevel(arrayValue));
-                        beginArray(arrayValue.size());
+                        stack.push(new ArrayStackLevel(v));
+                        beginArray(v.size());
                     }
                     break;
                 case OBJECT:
-                    ObjectValue objectValue = WorthUtils.dynamicCast(v, ObjectValue.class);
-                    if(ids != null && (id = ids.get(new ValueIdentity(objectValue))) != null) {
+                    if(ids != null && (id = ids.get(new ValueIdentity(v))) != null) {
                         if(dumpedId.add(id)) {
-                            stack.push(new ObjectStackLevel(WorthUtils.dynamicCast(v, ObjectValue.class)));
+                            stack.push(new ObjectStackLevel(v));
                             valueId(id);
-                            beginObject(objectValue.size());
+                            beginObject(v.size());
                         } else {
                             valueReference(id);
                         }
                     } else {
-                        stack.push(new ObjectStackLevel(WorthUtils.dynamicCast(v, ObjectValue.class)));
-                        beginObject(objectValue.size());
+                        stack.push(new ObjectStackLevel(v));
+                        beginObject(v.size());
                     }
                     break;
             }

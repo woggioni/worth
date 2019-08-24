@@ -32,6 +32,11 @@ public class ArrayValue implements Value, Iterable<Value> {
     }
 
     @Override
+    public void set(int index, Value value) {
+        this.value.set(index, value);
+    }
+
+    @Override
     public Value get(int index) {
         int sz = size();
         if(index < sz) {

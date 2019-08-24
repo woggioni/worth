@@ -85,8 +85,8 @@ abstract class MapObjectValue implements ObjectValue {
     }
 
     @Override
-    public Map<String, Value> asObject() {
-        return Collections.unmodifiableMap(value);
+    public Iterable<Map.Entry<String, Value>> asObject() {
+        return () -> value.entrySet().iterator();
     }
 
     @Override
@@ -168,12 +168,8 @@ class ListObjectValue implements ObjectValue {
     }
 
     @Override
-    public Map<String, Value> asObject() {
-        Map<String, Value> result = new LinkedHashMap<>();
-        for (Map.Entry<String, Value> entry : value) {
-            result.put(entry.getKey(), entry.getValue());
-        }
-        return Collections.unmodifiableMap(result);
+    public Iterable<Map.Entry<String, Value>> asObject() {
+        return value::iterator;
     }
 
     @Override
