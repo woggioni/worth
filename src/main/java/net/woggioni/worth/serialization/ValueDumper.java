@@ -6,8 +6,6 @@ import net.woggioni.worth.traversal.TraversalContext;
 import net.woggioni.worth.traversal.ValueIdentity;
 import net.woggioni.worth.traversal.ValueVisitor;
 import net.woggioni.worth.traversal.ValueWalker;
-import net.woggioni.worth.value.ArrayValue;
-import net.woggioni.worth.value.ObjectValue;
 import net.woggioni.worth.xface.Dumper;
 import net.woggioni.worth.xface.Value;
 
