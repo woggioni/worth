@@ -7,6 +7,7 @@ import org.junit.Test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class Leb128Test {
@@ -27,7 +28,9 @@ public class Leb128Test {
     @Test
     public void testDouble() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        List<Double> numbers = Arrays.asList(0.0, 1.5, -3.0, 0.5, 2.5, 8.25, -125.0, 255.0, 10325.0, -2000.0, 1024.0 * 1024 * 1024 * 12);
+        List<Double> numbers = Arrays.asList(
+                0.0, 1.5, -3.0, 0.5, 2.5, 8.25, -125.0, 255.0, 10325.0, -2000.0, 1024.0 * 1024 * 1024 * 12,
+                -122.42200352825247, 37.80848009696725);
 
         numbers.forEach(n -> Leb128.encode(baos, n));
 

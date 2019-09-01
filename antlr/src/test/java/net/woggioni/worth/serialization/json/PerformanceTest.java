@@ -6,6 +6,8 @@ import lombok.SneakyThrows;
 import net.woggioni.worth.antlr.JSONLexer;
 import net.woggioni.worth.antlr.JSONListenerImpl;
 import net.woggioni.worth.serialization.binary.JBONDumper;
+import net.woggioni.worth.serialization.binary.JBONParser;
+import net.woggioni.worth.value.ObjectValue;
 import net.woggioni.worth.xface.Dumper;
 import net.woggioni.worth.xface.Parser;
 import net.woggioni.worth.xface.Value;
@@ -29,6 +31,11 @@ public class PerformanceTest {
     @SneakyThrows
     private static InputStream extractTestData() {
         return new XZInputStream(new BufferedInputStream(PerformanceTest.class.getResourceAsStream("/citylots.json.xz")));
+    }
+
+    @SneakyThrows
+    private static InputStream extractBinaryTestData() {
+        return new XZInputStream(new BufferedInputStream(PerformanceTest.class.getResourceAsStream("/citylots.jbon.xz")));
     }
 
     private static InputStream smallTestData() {
@@ -95,6 +102,9 @@ public class PerformanceTest {
     public void hugeJSONTest() {
         double jacksonTime, worthTime, antlrTime;
         Chronometer chr = new Chronometer();
+        Value.Configuration cfg = Value.Configuration.builder()
+                .objectValueImplementation(ObjectValue.Implementation.ArrayList)
+                .build();
         try(InputStream is = extractTestData()) {
             chr.reset();
             ObjectMapper om = new ObjectMapper();
@@ -104,10 +114,18 @@ public class PerformanceTest {
         }
         try(InputStream is = extractTestData()) {
             chr.reset();
-            new JSONParser().parse(is);
+            new JSONParser(cfg).parse(is);
             worthTime = chr.stop(Chronometer.TimeUnit.SECOND);
             System.out.printf("Worth time:   %8s sec\n", String.format("%.3f", worthTime));
         }
+
+        try(InputStream is = extractBinaryTestData()) {
+            chr.reset();
+            new JBONParser(cfg).parse(is);
+            worthTime = chr.stop(Chronometer.TimeUnit.SECOND);
+            System.out.printf("Worth time binary:   %8s sec\n", String.format("%.3f", worthTime));
+        }
+
         try(InputStream is = extractTestData()) {
             chr.reset();
             CharStream inputStream = CharStreams.fromReader(new InputStreamReader(is));

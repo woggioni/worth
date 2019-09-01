@@ -26,10 +26,10 @@ public class Leb128 {
     public static int encode(OutputStream os, long input) {
         int bytes_written = 0;
         long number = input >= 0 ? (input << 1) : (-(input + 1)) << 1 | 1;
-        while(number > 127) {
+        while((number & 127L) != number) {
             os.write((int) (number & 127) | 128);
             bytes_written++;
-            number >>= 7;
+            number >>>= 7;
         }
         os.write((int) number);
         return ++bytes_written;
@@ -67,11 +67,10 @@ public class Leb128 {
                 if(c < 0) {
                     throw new IllegalArgumentException("Unexpected end of file");
                 }
-                byte b = (byte) c;
-                res |= ((long)(b & 127)) << (i * 7);
-                if(b >= 0) break;
+                res |= ((long)(c & 127)) << (i * 7);
+                if((byte) c >= 0) break;
             }
-            return (res & 1) != 0 ? - (res >> 1) - 1 : (res >> 1);
+            return (res & 1) != 0 ? - (res >>> 1) - 1 : (res >>> 1);
         }
     }
 }
