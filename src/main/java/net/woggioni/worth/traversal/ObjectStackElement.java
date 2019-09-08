@@ -1,6 +1,5 @@
 package net.woggioni.worth.traversal;
 
-import lombok.Getter;
 import net.woggioni.worth.value.ObjectValue;
 import net.woggioni.worth.xface.Value;
 
@@ -11,10 +10,8 @@ class ObjectStackElement<T> extends AbstractStackElement<T> {
 
     private final Iterator<Map.Entry<String, Value>> it;
 
-    @Getter
     private int currentIndex;
 
-    @Getter
     private String currentKey;
 
     private Value currentValue;

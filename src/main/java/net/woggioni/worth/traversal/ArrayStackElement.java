@@ -1,6 +1,5 @@
 package net.woggioni.worth.traversal;
 
-import lombok.Getter;
 import net.woggioni.worth.exception.NotImplementedException;
 import net.woggioni.worth.value.ArrayValue;
 import net.woggioni.worth.xface.Value;
@@ -13,7 +12,6 @@ class ArrayStackElement<T> extends AbstractStackElement<T> {
 
     private final Iterator<Value> it;
 
-    @Getter
     private int currentIndex;
 
     private Value currentValue = null;
