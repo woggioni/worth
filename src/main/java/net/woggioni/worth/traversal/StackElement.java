@@ -2,8 +2,10 @@ package net.woggioni.worth.traversal;
 
 import net.woggioni.worth.xface.Value;
 
-abstract class StackElement {
-    abstract Value current();
-    abstract Value next();
-    abstract boolean hasNext();
+public interface StackElement<T> {
+    T getContext();
+    void setContext(T ctx);
+    Value getValue();
+    String getCurrentKey();
+    int getCurrentIndex();
 }

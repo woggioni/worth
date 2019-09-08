@@ -7,7 +7,9 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -140,5 +142,17 @@ public class WorthUtils {
         if(System.getProperty(key) == null) {
             System.setProperty(key, value);
         }
+    }
+
+    public static <T> T tail(List<T> l) {
+        return tail(l, -1);
+    }
+
+    public static <T> T tail(List<T> l, int offset) {
+        return l.get(l.size() + offset);
+    }
+
+    public static <T> T pop(List<T> l) {
+        return l.remove(l.size() - 1);
     }
 }

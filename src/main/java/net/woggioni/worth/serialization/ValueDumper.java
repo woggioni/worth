@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import static net.woggioni.worth.utils.WorthUtils.tail;
+
 public abstract class ValueDumper implements Dumper {
 
     protected final Value.Configuration cfg;
@@ -30,10 +32,11 @@ public abstract class ValueDumper implements Dumper {
 
     protected Map<ValueIdentity, Integer> getIdMap(Value root) {
         Map<ValueIdentity, Integer> occurrencies = new HashMap<>();
-        ValueVisitor visitor = new ValueVisitor(){
+        ValueVisitor visitor = new ValueVisitor<Void>() {
             @Override
-            public boolean filter(Value value, TraversalContext ctx) {
-                if(value.type() == Value.Type.ARRAY || value.type() == Value.Type.OBJECT) {
+            public boolean visitPre(TraversalContext<Void> ctx) {
+                Value value = tail(ctx.getStack()).getValue();
+                if (value.type() == Value.Type.ARRAY || value.type() == Value.Type.OBJECT) {
                     ValueIdentity identity = new ValueIdentity(value);
                     Integer i = occurrencies.getOrDefault(identity, 0);
                     occurrencies.put(identity, ++i);
@@ -46,8 +49,8 @@ public abstract class ValueDumper implements Dumper {
         ValueWalker.walk(root, visitor);
         Map<ValueIdentity, Integer> result = new HashMap<>();
         int i = 0;
-        for(Map.Entry<ValueIdentity, Integer> entry : occurrencies.entrySet()) {
-            if(entry.getValue() > 1) {
+        for (Map.Entry<ValueIdentity, Integer> entry : occurrencies.entrySet()) {
+            if (entry.getValue() > 1) {
                 result.put(entry.getKey(), i++);
             }
         }

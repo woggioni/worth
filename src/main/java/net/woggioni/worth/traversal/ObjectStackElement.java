@@ -7,12 +7,9 @@ import net.woggioni.worth.xface.Value;
 import java.util.Iterator;
 import java.util.Map;
 
-public class ObjectStackElement extends StackElement {
+class ObjectStackElement<T> extends AbstractStackElement<T> {
 
     private final Iterator<Map.Entry<String, Value>> it;
-
-    @Getter
-    private final ObjectValue value;
 
     @Getter
     private int currentIndex;
@@ -23,18 +20,12 @@ public class ObjectStackElement extends StackElement {
     private Value currentValue;
 
     public ObjectStackElement(ObjectValue ov) {
-        value = ov;
+        super(ov);
         it = ov.iterator();
         currentIndex = -1;
     }
 
-    @Override
-    Value current() {
-        return currentValue;
-    }
-
-    @Override
-    Value next() {
+    public Value next() {
         Map.Entry<String, Value> result = it.next();
         currentKey = result.getKey();
         currentIndex++;
@@ -42,8 +33,17 @@ public class ObjectStackElement extends StackElement {
         return currentValue;
     }
 
-    @Override
-    boolean hasNext() {
+    public boolean hasNext() {
         return it.hasNext();
+    }
+
+    @Override
+    public String getCurrentKey() {
+        return currentKey;
+    }
+
+    @Override
+    public int getCurrentIndex() {
+        return currentIndex;
     }
 }

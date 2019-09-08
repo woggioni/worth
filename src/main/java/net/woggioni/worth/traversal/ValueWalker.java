@@ -1,6 +1,7 @@
 package net.woggioni.worth.traversal;
 
-import net.woggioni.worth.value.*;
+import net.woggioni.worth.value.ArrayValue;
+import net.woggioni.worth.value.ObjectValue;
 import net.woggioni.worth.xface.Value;
 
 import java.util.ArrayList;
@@ -10,6 +11,40 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static net.woggioni.worth.utils.WorthUtils.dynamicCast;
+import static net.woggioni.worth.utils.WorthUtils.pop;
+import static net.woggioni.worth.utils.WorthUtils.tail;
+
+class TraversalContextImpl<T> implements TraversalContext<T> {
+    private final List<StackElement<T>> immutableStack;
+
+    public TraversalContextImpl(List<? extends StackElement<T>> stack) {
+        immutableStack = Collections.unmodifiableList(stack);
+    }
+
+    @Override
+    public List<StackElement<T>> getStack() {
+        return immutableStack;
+    }
+
+    @Override
+    public String getPath() {
+        StringBuilder sb = new StringBuilder();
+        for (StackElement se : immutableStack) {
+            ArrayStackElement ase;
+            ObjectStackElement ose;
+            if ((ase = dynamicCast(se, ArrayStackElement.class)) != null) {
+                sb.append("[");
+                sb.append(ase.getCurrentIndex());
+                sb.append("]");
+            } else if ((ose = dynamicCast(se, ObjectStackElement.class)) != null) {
+                sb.append("[\"");
+                sb.append(ose.getCurrentKey());
+                sb.append("\"]");
+            }
+        }
+        return sb.toString();
+    }
+}
 
 public class ValueWalker {
 
@@ -20,7 +55,7 @@ public class ValueWalker {
     }
 
     public ValueWalker get(String key) {
-        if(parent.type() == Value.Type.OBJECT) {
+        if (parent.type() == Value.Type.OBJECT) {
             parent = parent.get(key);
         } else {
             parent = Value.Null;
@@ -29,7 +64,7 @@ public class ValueWalker {
     }
 
     public ValueWalker get(int index) {
-        if(parent.type() == Value.Type.ARRAY) {
+        if (parent.type() == Value.Type.ARRAY) {
             parent = parent.get(index);
         } else {
             parent = Value.Null;
@@ -42,7 +77,7 @@ public class ValueWalker {
     }
 
     public <T> Optional<T> map(Function<Value, T> callback) {
-        if(isPresent()) {
+        if (isPresent()) {
             return Optional.of(callback.apply(parent));
         } else {
             return Optional.empty();
@@ -50,7 +85,7 @@ public class ValueWalker {
     }
 
     public <T> Optional<T> flatMap(Function<Value, Optional<T>> callback) {
-        if(isPresent()) {
+        if (isPresent()) {
             return callback.apply(parent);
         } else {
             return Optional.empty();
@@ -65,91 +100,56 @@ public class ValueWalker {
         return parent.type() == Value.Type.NULL;
     }
 
-    public static void walk(Value root, ValueVisitor visitor) {
-        List<StackElement> stack = new ArrayList<>();
-        List<StackElement> immutableStack = Collections.unmodifiableList(stack);
+    private static <T> AbstractStackElement<T> stackElementFromValue(Value value) {
+        AbstractStackElement<T> result;
+        switch (value.type()) {
+            case ARRAY:
+                result = new ArrayStackElement<>((ArrayValue) value);
+                break;
+            case OBJECT:
+                result = new ObjectStackElement<>((ObjectValue) value);
+                break;
+            default:
+                result = new LeafStackElement<>(value);
+                break;
+        }
+        return result;
+    }
 
-        TraversalContext ctx = new TraversalContext() {
-
-            @Override
-            public Value getRoot() {
-                return root;
+    private static <T> AbstractStackElement<T> nextChildStackElement(StackElement<T> parent) {
+        AbstractStackElement<T> result = null;
+        if (parent instanceof ArrayStackElement) {
+            ArrayStackElement ase = (ArrayStackElement) parent;
+            if (ase.hasNext()) {
+                result = stackElementFromValue(ase.next());
             }
-
-            @Override
-            public List<StackElement> getStack() {
-                return immutableStack;
+        } else if (parent instanceof ObjectStackElement) {
+            ObjectStackElement ose = (ObjectStackElement) parent;
+            if (ose.hasNext()) {
+                result = stackElementFromValue(ose.next());
             }
+        }
+        return result;
+    }
 
-            @Override
-            public String getPath() {
-                StringBuilder sb = new StringBuilder();
-                for(StackElement se : stack) {
-                    ArrayStackElement ase;
-                    ObjectStackElement ose;
-                    if((ase = dynamicCast(se, ArrayStackElement.class)) != null) {
-                        sb.append("[");
-                        sb.append(ase.getCurrentIndex());
-                        sb.append("]");
-                    } else if((ose = dynamicCast(se, ObjectStackElement.class)) != null) {
-                        sb.append("[\"");
-                        sb.append(ose.getCurrentKey());
-                        sb.append("\"]");
-                    }
-                }
-                return sb.toString();
-            }
-        };
-
-        ObjectValue ov;
-        ArrayValue av = new ArrayValue();
-        av.add(root);
-        ArrayStackElement ase = new ArrayStackElement(av);
-        stack.add(ase);
-        while(true) {
-            Value currentValue = stack.get(stack.size() - 1).next();
-            if(visitor.filter(currentValue, ctx)) {
-                if ((av = dynamicCast(currentValue, ArrayValue.class)) != null) {
-                    ase = new ArrayStackElement(av);
-                    stack.add(ase);
-                } else if ((ov = dynamicCast(currentValue, ObjectValue.class)) != null) {
-                    ObjectStackElement ose = new ObjectStackElement(ov);
-                    stack.add(ose);
-                } else {
-                    IntegerValue iv;
-                    BooleanValue bv;
-                    NullValue nv;
-                    FloatValue fv;
-                    StringValue sv;
-                    if ((iv = dynamicCast(currentValue, IntegerValue.class)) != null) {
-                        visitor.visit(iv, ctx);
-                    } else if ((fv = dynamicCast(currentValue, FloatValue.class)) != null) {
-                        visitor.visit(fv, ctx);
-                    } else if ((bv = dynamicCast(currentValue, BooleanValue.class)) != null) {
-                        visitor.visit(bv, ctx);
-                    } else if ((sv = dynamicCast(currentValue, StringValue.class)) != null) {
-                        visitor.visit(sv, ctx);
-                    } else if ((nv = dynamicCast(currentValue, NullValue.class)) != null) {
-                        visitor.visit(nv, ctx);
-                    }
+    public static <T> void walk(Value root, ValueVisitor<T> visitor) {
+        List<AbstractStackElement<T>> stack = new ArrayList<>();
+        TraversalContext<T> ctx = new TraversalContextImpl<>(stack);
+        AbstractStackElement<T> stackElement = stackElementFromValue(root);
+        stack.add(stackElement);
+        stackElement.traverseChildren = visitor.visitPre(ctx);
+        while (!stack.isEmpty()) {
+            AbstractStackElement<T> last = tail(stack);
+            if(last.traverseChildren) {
+                AbstractStackElement<T> childStackElement = nextChildStackElement(last);
+                if(childStackElement != null) {
+                    stack.add(childStackElement);
+                    childStackElement.traverseChildren = visitor.visitPre(ctx);
+                    continue;
                 }
             }
-            while(true) {
-                if(stack.size() == 1) return;
-                int lastIndex = stack.size() - 1;
-                StackElement se = stack.get(lastIndex);
-                if(!se.hasNext()) {
-                    ObjectStackElement ose;
-                    if((ase = dynamicCast(se, ArrayStackElement.class)) != null) {
-                        visitor.visit(ase.getValue(), ctx);
-                    } else if((ose = dynamicCast(se, ObjectStackElement.class)) != null) {
-                        visitor.visit(ose.getValue(), ctx);
-                    }
-                    stack.remove(lastIndex);
-                } else {
-                    break;
-                }
-            }
+            visitor.visitPost(ctx);
+            pop(stack);
         }
     }
 }

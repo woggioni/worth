@@ -1,15 +1,15 @@
 package net.woggioni.worth.traversal;
 
 import lombok.Getter;
+import net.woggioni.worth.exception.NotImplementedException;
 import net.woggioni.worth.value.ArrayValue;
 import net.woggioni.worth.xface.Value;
 
 import java.util.Iterator;
 
-public class ArrayStackElement extends StackElement {
+import static net.woggioni.worth.utils.WorthUtils.newThrowable;
 
-    @Getter
-    private final ArrayValue value;
+class ArrayStackElement<T> extends AbstractStackElement<T> {
 
     private final Iterator<Value> it;
 
@@ -19,24 +19,28 @@ public class ArrayStackElement extends StackElement {
     private Value currentValue = null;
 
     ArrayStackElement(ArrayValue av) {
-        this.value = av;
+        super(av);
         it = av.iterator();
     }
 
-    @Override
-    Value current() {
-        return currentValue;
-    }
-
-    @Override
     Value next() {
         currentValue = it.next();
         currentIndex++;
         return currentValue;
     }
 
-    @Override
     boolean hasNext() {
         return it.hasNext();
+    }
+
+    @Override
+    public String getCurrentKey() {
+        throw newThrowable(NotImplementedException.class,
+                "currentKey not supported for value of type '%s'", getValue().type());
+    }
+
+    @Override
+    public int getCurrentIndex() {
+        return currentIndex;
     }
 }

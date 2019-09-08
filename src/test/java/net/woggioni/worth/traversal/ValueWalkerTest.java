@@ -3,6 +3,7 @@ package net.woggioni.worth.traversal;
 import lombok.SneakyThrows;
 import net.woggioni.worth.serialization.json.JSONParser;
 import net.woggioni.worth.serialization.json.JSONTest;
+import net.woggioni.worth.utils.Tuple2;
 import net.woggioni.worth.utils.WorthUtils;
 import net.woggioni.worth.value.*;
 import net.woggioni.worth.xface.Parser;
@@ -33,65 +34,46 @@ public class ValueWalkerTest {
         Assert.assertEquals("Amazon", text.get());
     }
 
-    private static class TestVisitor implements ValueVisitor {
+    private static class TestVisitor implements ValueVisitor<Void> {
 
-        public List<Value> values = new ArrayList<>();
+        public List<Value> preValues = new ArrayList<>();
+        public List<Value> postValues = new ArrayList<>();
 
         @Override
-        public void visit(ObjectValue value, TraversalContext ctx) {
-            values.add(value);
+        public boolean visitPre(TraversalContext<Void> ctx) {
+            Value value = WorthUtils.tail(ctx.getStack()).getValue();
+            preValues.add(value);
+            return true;
         }
 
         @Override
-        public void visit(ArrayValue value, TraversalContext ctx) {
-            values.add(value);
-        }
-
-        @Override
-        public void visit(BooleanValue value, TraversalContext ctx) {
-            values.add(value);
-        }
-
-        @Override
-        public void visit(StringValue value, TraversalContext ctx) {
-            values.add(value);
-        }
-
-        @Override
-        public void visit(IntegerValue value, TraversalContext ctx) {
-            values.add(value);
-        }
-
-        @Override
-        public void visit(FloatValue value, TraversalContext ctx) {
-            values.add(value);
-        }
-
-        @Override
-        public void visit(NullValue value, TraversalContext ctx) {
-            values.add(value);
+        public void visitPost(TraversalContext<Void> ctx) {
+            Value value = WorthUtils.tail(ctx.getStack()).getValue();
+            postValues.add(value);
         }
     }
 
-    private void walk(List<Value> result, Value value) {
+    private void walk(List<Value> preResult, List<Value> postResult, Value value) {
         ObjectValue ov;
         ArrayValue av;
+        preResult.add(value);
         if((av = WorthUtils.dynamicCast(value, ArrayValue.class)) != null) {
             for(Value v : av) {
-                walk(result, v);
+                walk(preResult, postResult, v);
             }
         } else if((ov = WorthUtils.dynamicCast(value, ObjectValue.class)) != null) {
             for(Map.Entry<String, Value> entry : ov) {
-                walk(result, entry.getValue());
+                walk(preResult, postResult, entry.getValue());
             }
         }
-        result.add(value);
+        postResult.add(value);
     }
 
-    private List<Value> recursiveWalk(Value root) {
-        List<Value> result = new ArrayList<>();
-        walk(result, root);
-        return result;
+    private Tuple2<List<Value>, List<Value>> recursiveWalk(Value root) {
+        List<Value> preResult = new ArrayList<>();
+        List<Value> postResult = new ArrayList<>();
+        walk(preResult, postResult, root);
+        return new Tuple2<>(preResult, postResult);
     }
 
     @Test
@@ -99,7 +81,8 @@ public class ValueWalkerTest {
         Value v = JSONParser.newInstance().parse(JSONTest.getTestSource("/test.json"));
         TestVisitor visitor = new TestVisitor();
         ValueWalker.walk(v, visitor);
-        Assert.assertFalse(visitor.values.isEmpty());
-        Assert.assertEquals(recursiveWalk(v), visitor.values);
+        Assert.assertFalse(visitor.preValues.isEmpty());
+        Assert.assertFalse(visitor.postValues.isEmpty());
+        Assert.assertEquals(recursiveWalk(v), new Tuple2<>(visitor.preValues, visitor.postValues));
     }
 }
