@@ -199,7 +199,7 @@ class ListObjectValue implements ObjectValue {
 
     @Override
     public void put(String key, Value value2Put) {
-        value.add(new ObjectEntry(key, value2Put));
+        value.add(new ObjectEntry<>(key, value2Put));
     }
 
 

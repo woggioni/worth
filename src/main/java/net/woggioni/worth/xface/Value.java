@@ -98,10 +98,6 @@ public interface Value {
             System.getProperty(ObjectValue.class.getName() + ".implementation", "TreeMap"));
 
         @Builder.Default
-        public final boolean useReferences = Boolean.valueOf(
-            System.getProperty(Value.class.getName() + ".useReferences", "false"));
-
-        @Builder.Default
         public final int maxDepth =
             Integer.parseInt(System.getProperty(Value.class.getName() + ".maxDepth", "1048576"));
 

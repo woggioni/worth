@@ -218,9 +218,9 @@ public class JSONParser extends ValueParser {
                     try {
                         String text = parseNumber(stream);
                         if (text.indexOf('.') > 0) {
-                            floatValue(Double.valueOf(text));
+                            floatValue(Double.parseDouble(text));
                         } else {
-                            integerValue(Long.valueOf(text));
+                            integerValue(Long.parseLong(text));
                         }
                         continue;
                     } catch (NumberFormatException nfe) {

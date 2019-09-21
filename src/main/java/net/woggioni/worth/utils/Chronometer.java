@@ -1,4 +1,4 @@
-package net.woggioni.worth.serialization.json;
+package net.woggioni.worth.utils;
 
 public class Chronometer {
 
