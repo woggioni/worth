@@ -228,11 +228,9 @@ public class JSONTest {
         String hex = "1F608";
         byte[] buffer = hex.getBytes();
         ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-        Method method = JSONParser.class.getDeclaredMethod("parseHex", LookAheadTextInputStream.class);
-        method.setAccessible(true);
         LookAheadTextInputStream ltis = new LookAheadTextInputStream(new InputStreamReader(bais));
         ltis.read();
-        int result = (int) method.invoke(null, ltis);
-        Assert.assertEquals((int) Integer.valueOf(hex, 16), result);
+        int result = JSONParser.parseHex(ltis);
+        Assert.assertEquals(Integer.parseInt(hex, 16), result);
     }
 }

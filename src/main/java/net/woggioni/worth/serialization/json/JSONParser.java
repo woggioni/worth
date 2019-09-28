@@ -27,10 +27,10 @@ public class JSONParser extends ValueParser {
         return c >= '0' && c <= '9' || c == '+' || c == '-' || c == '.' || c == 'e';
     }
 
-    private static int parseHex(LookAheadTextInputStream stream) {
+    static int parseHex(LookAheadTextInputStream stream) {
         int result = 0;
-        while (true) {
-            int c = stream.getCurrentByte();
+        int c = stream.getCurrentByte();
+        while (c != -1) {
             if (c >= '0' && c <= '9') {
                 result = result << 4;
                 result += (c - '0');
@@ -43,7 +43,7 @@ public class JSONParser extends ValueParser {
             } else {
                 break;
             }
-            stream.read();
+            c = stream.read();
         }
         return result;
     }
@@ -64,19 +64,19 @@ public class JSONParser extends ValueParser {
         return sb.toString();
     }
 
-    private final int parseId(LookAheadTextInputStream stream) {
+    private int parseId(LookAheadTextInputStream stream) {
         StringBuilder sb = new StringBuilder();
         boolean digitsStarted = false;
         boolean digitsEnded = false;
         while (true) {
             int b = stream.getCurrentByte();
-            if(b == '(' ) {
-            } else if(Character.isWhitespace(b)) {
-                if(digitsStarted) digitsEnded = true;
+            if (b == '(') {
+            } else if (Character.isWhitespace(b)) {
+                if (digitsStarted) digitsEnded = true;
             } else if (b < 0 || b == ')') {
                 break;
             } else if (isDecimal(b)) {
-                if(digitsEnded) {
+                if (digitsEnded) {
                     error(ParseException::new, "error parsing id");
                 } else {
                     digitsStarted = true;
@@ -85,7 +85,7 @@ public class JSONParser extends ValueParser {
             }
             stream.read();
         }
-        return Integer.valueOf(sb.toString());
+        return Integer.parseInt(sb.toString());
     }
 
     private String readString(LookAheadTextInputStream stream) {
@@ -151,14 +151,15 @@ public class JSONParser extends ValueParser {
     }
 
     @Override
-    protected <T extends RuntimeException> T error(Function<String, T> constructor, String fmt, Object ...args) {
+    protected <T extends RuntimeException> T error(Function<String, T> constructor, String fmt, Object... args) {
         return constructor.apply(String.format("Error at line %d column %d: %s",
-            currentLine, currentColumn, String.format(fmt, args)));
+                currentLine, currentColumn, String.format(fmt, args)));
     }
 
     public static Parser newInstance() {
         return new JSONParser();
     }
+
     public static Parser newInstance(Value.Configuration cfg) {
         return new JSONParser(cfg);
     }
@@ -192,6 +193,7 @@ public class JSONParser extends ValueParser {
                 return result;
             }
         };
+        stream.read();
 
         try {
             Integer currentId = null;
@@ -204,13 +206,13 @@ public class JSONParser extends ValueParser {
                     currentId = parseId(stream);
                 } else if (c == '{') {
                     Value newObject = beginObject();
-                    if(currentId != null) valueId(currentId, newObject);
+                    if (currentId != null) valueId(currentId, newObject);
                     currentId = null;
                 } else if (c == '}') {
                     endObject();
                 } else if (c == '[') {
                     Value newArray = beginArray();
-                    if(currentId != null) valueId(currentId, newArray);
+                    if (currentId != null) valueId(currentId, newArray);
                     currentId = null;
                 } else if (c == ']') {
                     endArray();
@@ -246,7 +248,7 @@ public class JSONParser extends ValueParser {
                 } else if (idMap != null && c == '$') {
                     stream.read();
                     String text = parseNumber(stream);
-                    valueReference(Integer.valueOf(text));
+                    valueReference(Integer.parseInt(text));
                     continue;
                 }
                 stream.read();
@@ -262,7 +264,7 @@ public class JSONParser extends ValueParser {
                 }
                 throw error(ParseException::new, "Missing '%c' token", c);
             }
-            return WorthUtils.dynamicCast(stack.getFirst(), ArrayStackLevel.class).value.get(0);
+            return ((ArrayStackLevel) stack.getFirst()).value.get(0);
         } catch (NumberFormatException e) {
             throw error(ParseException::new, e.getMessage());
         } finally {

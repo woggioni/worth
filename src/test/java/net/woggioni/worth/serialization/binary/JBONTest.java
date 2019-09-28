@@ -79,18 +79,4 @@ public class JBONTest {
             Assert.assertEquals(originalValue, binarySerializedValue);
         }
     }
-
-    @Test
-    @SneakyThrows
-    public void hexTest() {
-        String hex = "1F608";
-        byte[] buffer = hex.getBytes();
-        ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-        Method method = JSONParser.class.getDeclaredMethod("parseHex", LookAheadTextInputStream.class);
-        method.setAccessible(true);
-        LookAheadTextInputStream ltis = new LookAheadTextInputStream(new InputStreamReader(bais));
-        ltis.read();
-        int result = (int) method.invoke(null, ltis);
-        Assert.assertEquals((int) Integer.valueOf(hex, 16), result);
-    }
 }

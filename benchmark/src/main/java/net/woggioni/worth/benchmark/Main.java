@@ -30,7 +30,7 @@ public class Main {
 
     @SneakyThrows
     private static InputStream extractTestData() {
-        return new XZInputStream(new BufferedInputStream(Main.class.getResourceAsStream("/citylots.json.xz")));
+        return new XZInputStream(Main.class.getResourceAsStream("/citylots.json.xz"));
     }
 
     @SneakyThrows
@@ -62,7 +62,7 @@ public class Main {
             for (int j = 0; j < 2; j++) {
                 chr.reset();
                 for (int i = 0; i < loops; i++) {
-                    Value value = new JSONParser().parse(smallTestData());
+                    Value value = new JSONParser().parse(new BufferedReader(new InputStreamReader(smallTestData())));
                 }
             }
             worthTime = chr.stop(Chronometer.TimeUnit.MILLISECOND);
@@ -98,7 +98,7 @@ public class Main {
         try (InputStream is = extractTestData()) {
             chr.reset();
             ObjectMapper om = new ObjectMapper();
-            om.readTree(is);
+            om.readTree(new InputStreamReader(is));
             double elapsedTime = chr.stop(Chronometer.TimeUnit.SECOND);
             System.out.printf("Jackson time: %8s sec\n", String.format("%.3f", elapsedTime));
         }

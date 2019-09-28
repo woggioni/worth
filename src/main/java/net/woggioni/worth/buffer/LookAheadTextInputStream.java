@@ -8,7 +8,11 @@ import java.io.Reader;
 public class LookAheadTextInputStream extends InputStream {
 
     private final Reader reader;
-    private int currentByte;
+    private char[] buffer = new char[1024];
+    private int bufferFill = -1;
+    private int cursor = -1;
+    private int currentChar;
+
 
     public LookAheadTextInputStream(Reader reader) {
         this.reader = reader;
@@ -17,12 +21,21 @@ public class LookAheadTextInputStream extends InputStream {
     @Override
     @SneakyThrows
     public int read() {
-        int result = currentByte;
-        currentByte = reader.read();
-        return result;
+        if (cursor > bufferFill) {
+            return -1;
+        } else if (cursor == bufferFill) {
+            do {
+                bufferFill = reader.read(buffer, 0, buffer.length) - 1;
+                cursor = 0;
+            } while(bufferFill == -1);
+            currentChar = bufferFill == -2 ? -1 : buffer[0];
+        } else {
+            currentChar = buffer[++cursor];
+        }
+        return currentChar;
     }
 
-    public int getCurrentByte(){
-        return currentByte;
+    public int getCurrentByte() {
+        return currentChar;
     }
 }
