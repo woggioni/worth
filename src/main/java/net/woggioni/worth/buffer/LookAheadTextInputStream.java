@@ -7,8 +7,8 @@ import java.io.Reader;
 
 public class LookAheadTextInputStream extends InputStream {
 
+    private final char[] buffer = new char[1024];
     private final Reader reader;
-    private char[] buffer = new char[1024];
     private int bufferFill = -1;
     private int cursor = -1;
     private int currentChar;

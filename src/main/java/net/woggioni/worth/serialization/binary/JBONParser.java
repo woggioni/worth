@@ -4,7 +4,6 @@ import lombok.SneakyThrows;
 import net.woggioni.worth.buffer.LookAheadInputStream;
 import net.woggioni.worth.exception.ParseException;
 import net.woggioni.worth.serialization.ValueParser;
-import net.woggioni.worth.serialization.json.JSONParser;
 import net.woggioni.worth.utils.Leb128;
 import net.woggioni.worth.utils.WorthUtils;
 import net.woggioni.worth.xface.Parser;
@@ -36,7 +35,6 @@ public class JBONParser extends ValueParser {
                 return result;
             }
         };
-        stream.read();
 
         try {
             Integer currentId = null;
@@ -132,7 +130,7 @@ public class JBONParser extends ValueParser {
                 }
                 throw error(ParseException::new, "Unfinished %s", type);
             }
-            return WorthUtils.dynamicCast(stack.getFirst(), ArrayStackLevel.class).value.get(0);
+            return ((ArrayStackLevel) stack.getFirst()).value.get(0);
         } catch (NumberFormatException | NegativeArraySizeException e) {
             throw error(ParseException::new, e.getMessage());
         } finally {
