@@ -61,8 +61,8 @@ public class JSONTest {
                     return false;
                 }
             case ARRAY:
-                ArrayValue array = WorthUtils.dynamicCast(value, ArrayValue.class);
-                if (jsonNode.getNodeType() == JsonNodeType.ARRAY && array.size() == jsonNode.size()) {
+                ArrayValue array;
+                if (jsonNode.getNodeType() == JsonNodeType.ARRAY && (array = (ArrayValue) value).size() == jsonNode.size()) {
                     for (int i = 0; i < array.size(); i++) {
                         if (!compareValueAndJsonNode(array.get(i), jsonNode.get(i))) {
                             return false;
@@ -73,8 +73,8 @@ public class JSONTest {
                     return false;
                 }
             case OBJECT:
-                ObjectValue object = WorthUtils.dynamicCast(value, ObjectValue.class);
                 if (jsonNode.getNodeType() == JsonNodeType.OBJECT) {
+                    ObjectValue object = (ObjectValue) value;
                     for (Map.Entry<String, Value> entry : object) {
                         if (!jsonNode.has(entry.getKey())) {
                             return false;
@@ -153,8 +153,9 @@ public class JSONTest {
                     return false;
                 }
             case ARRAY:
-                ArrayValue array = WorthUtils.dynamicCast(value, ArrayValue.class);
-                if (jsonNode.getNodeType() == JsonNodeType.ARRAY && array.size() == jsonNode.size()) {
+                ArrayValue array;
+                if (jsonNode.getNodeType() == JsonNodeType.ARRAY &&
+                        (array = (ArrayValue) value).size() == jsonNode.size()) {
                     for (int i = 0; i < array.size(); i++) {
                         if (!compareValueAndJsonNode(array.get(i), jsonNode.get(i), cb)) {
                             return false;
@@ -166,8 +167,8 @@ public class JSONTest {
                     return false;
                 }
             case OBJECT:
-                ObjectValue object = WorthUtils.dynamicCast(value, ObjectValue.class);
                 if (jsonNode.getNodeType() == JsonNodeType.OBJECT) {
+                    ObjectValue object = (ObjectValue) value;
                     for (Map.Entry<String, Value> entry : object) {
                         if (!jsonNode.has(entry.getKey())) {
                             cb.call(value, jsonNode);

@@ -122,7 +122,7 @@ public class ListView<T> implements List<T> {
     public T get(int i) {
         int index = start + i;
         if(end >= 0 && index < end) {
-            throw new IndexOutOfBoundsException(i);
+            throw new IndexOutOfBoundsException(Integer.toString(i));
         }
         return delegate.get(start + i);
     }
@@ -172,7 +172,7 @@ public class ListView<T> implements List<T> {
     @Override
     public ListIterator<T> listIterator(int i) {
         if(i < 0 || i > size()) {
-            throw new IndexOutOfBoundsException(0);
+            throw new IndexOutOfBoundsException(Integer.toString(0));
         } else {
             return new ListViewIterator<>(this, start);
         }
@@ -181,9 +181,9 @@ public class ListView<T> implements List<T> {
     @Override
     public List<T> subList(int i, int i1) {
         if(i < 0) {
-            throw new IndexOutOfBoundsException(0);
+            throw new IndexOutOfBoundsException(Integer.toString(0));
         } else if(i1 > size()) {
-            throw new IndexOutOfBoundsException(i1);
+            throw new IndexOutOfBoundsException(Integer.toString(i1));
         } else {
             return new ListView<>(delegate, start + i, start + i1);
         }

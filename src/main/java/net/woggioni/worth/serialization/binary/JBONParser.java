@@ -40,8 +40,10 @@ public class JBONParser extends ValueParser {
             Integer currentId = null;
             Leb128.Leb128Decoder decoder = new Leb128.Leb128Decoder(stream);
             ObjectStackLevel osl;
+            StackLevel sl;
             while (true) {
-                if ((osl = WorthUtils.dynamicCast(stack.getFirst(), ObjectStackLevel.class)) != null && osl.currentKey == null) {
+                sl = stack.getFirst();
+                if (sl instanceof ObjectStackLevel && ((ObjectStackLevel) sl).currentKey == null) {
                     int size = (int) decoder.decode();
                     byte[] buffer = new byte[size];
                     stream.read(buffer);
@@ -106,14 +108,13 @@ public class JBONParser extends ValueParser {
                     throw new ParseException(String.format("Illegal byte at position %d: 0x%02x", cursor, c));
                 }
                 while(stack.size() > 0) {
-                    if ((osl = WorthUtils.dynamicCast(stack.getFirst(), ObjectStackLevel.class)) != null
-                            && osl.value.size() == osl.expectedSize) {
+                    sl = stack.getFirst();
+                    if (sl instanceof ObjectStackLevel && (osl = (ObjectStackLevel) sl).value.size() == osl.expectedSize) {
                         endObject();
                         continue;
                     }
                     ArrayStackLevel asl;
-                    if((asl = WorthUtils.dynamicCast(stack.getFirst(), ArrayStackLevel.class)) != null
-                            && asl.value.size() == asl.expectedSize) {
+                    if(sl instanceof ArrayStackLevel && (asl = (ArrayStackLevel) sl).value.size() == asl.expectedSize) {
                         endArray();
                         continue;
                     }

@@ -141,7 +141,8 @@ public class JSONDumper extends ValueDumper {
             StackLevel last = stack.getFirst();
             ArrayStackLevel arrayStackLevel;
             ObjectStackLevel objectStackLevel;
-            if ((arrayStackLevel = WorthUtils.dynamicCast(last, ArrayStackLevel.class)) != null) {
+            if (last instanceof ArrayStackLevel) {
+                arrayStackLevel = (ArrayStackLevel) last;
                 if (arrayStackLevel.hasNext()) {
                     if (arrayStackLevel.index > 0) {
                         writer.write(",");
@@ -151,7 +152,8 @@ public class JSONDumper extends ValueDumper {
                     endArray();
                     stack.pop();
                 }
-            } else if ((objectStackLevel = WorthUtils.dynamicCast(last, ObjectStackLevel.class)) != null) {
+            } else if (last instanceof ObjectStackLevel) {
+                objectStackLevel = (ObjectStackLevel) last;
                 if (objectStackLevel.hasNext()) {
                     if (objectStackLevel.index > 0) {
                         writer.write(",");

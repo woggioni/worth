@@ -2,7 +2,7 @@ package net.woggioni.worth.value;
 
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import net.woggioni.worth.utils.WorthUtils;
+import static net.woggioni.jwo.JWO.newThrowable;
 import net.woggioni.worth.xface.Value;
 
 import java.util.*;
@@ -29,7 +29,7 @@ public interface ObjectValue extends Value, Iterable<Map.Entry<String, Value>> {
                 result = new LinkedHashMapObjectValue();
                 break;
             default:
-                throw WorthUtils.newThrowable(IllegalArgumentException.class,
+                throw newThrowable(IllegalArgumentException.class,
                     "Unknown value of %s: %s",
                     Implementation.class.getName(),
                     cfg.objectValueImplementation);

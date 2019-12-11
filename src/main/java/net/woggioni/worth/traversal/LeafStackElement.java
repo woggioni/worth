@@ -3,7 +3,7 @@ package net.woggioni.worth.traversal;
 import net.woggioni.worth.exception.NotImplementedException;
 import net.woggioni.worth.xface.Value;
 
-import static net.woggioni.worth.utils.WorthUtils.newThrowable;
+import static net.woggioni.jwo.JWO.newThrowable;
 
 class LeafStackElement<T> extends AbstractStackElement<T> {
     public LeafStackElement(Value value) {

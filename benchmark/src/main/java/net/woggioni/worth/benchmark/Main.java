@@ -16,14 +16,16 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.tukaani.xz.XZInputStream;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -153,7 +155,7 @@ public class Main {
             Optional<Method> targetMethod = Arrays.stream(methods)
                     .filter(method -> Objects.equals(benchmarkName, method.getName()))
                     .findFirst();
-            targetMethod.ifPresent(new Consumer<>() {
+            targetMethod.ifPresent(new Consumer<Method>() {
                 @Override
                 @SneakyThrows
                 public void accept(Method method) {

@@ -6,7 +6,7 @@ import net.woggioni.worth.xface.Value;
 
 import java.util.Iterator;
 
-import static net.woggioni.worth.utils.WorthUtils.newThrowable;
+import static net.woggioni.jwo.JWO.newThrowable;
 
 class ArrayStackElement<T> extends AbstractStackElement<T> {
 

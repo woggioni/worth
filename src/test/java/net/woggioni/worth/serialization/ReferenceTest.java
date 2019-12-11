@@ -1,6 +1,7 @@
 package net.woggioni.worth.serialization;
 
 import lombok.SneakyThrows;
+import net.woggioni.jwo.JWO;
 import net.woggioni.worth.serialization.binary.JBONDumper;
 import net.woggioni.worth.serialization.binary.JBONParser;
 import net.woggioni.worth.serialization.json.JSONDumper;
@@ -38,7 +39,7 @@ public class ReferenceTest {
             dumper.dump(value, baos);
             bytes = baos.toByteArray();
         }
-        WorthUtils.writeBytes2File(Paths.get("/tmp/ciao.jbon"), bytes);
+        JWO.writeBytes2File(Paths.get("/tmp/ciao.jbon"), bytes);
         Value reparsedValue;
         try(ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
             Parser parser = parserConstructor.apply(cfg);

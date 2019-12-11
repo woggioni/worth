@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import static net.woggioni.worth.utils.WorthUtils.tail;
+import static net.woggioni.jwo.JWO.tail;
 
 public abstract class ValueDumper implements Dumper {
 

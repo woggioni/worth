@@ -230,8 +230,8 @@ public class JSONParser extends ValueParser {
                     }
                 } else if (c == '\"') {
                     String text = readString(stream);
-                    ObjectStackLevel osl;
-                    if ((osl = WorthUtils.dynamicCast(stack.getFirst(), ObjectStackLevel.class)) != null && osl.currentKey == null) {
+                    StackLevel sl = stack.getFirst();
+                    if (sl instanceof ObjectStackLevel && ((ObjectStackLevel) sl).currentKey == null) {
                         objectKey(text);
                     } else {
                         stringValue(text);

@@ -3,10 +3,8 @@ package net.woggioni.worth.serialization.binary;
 import lombok.SneakyThrows;
 import net.woggioni.worth.exception.NotImplementedException;
 import net.woggioni.worth.serialization.ValueDumper;
-import net.woggioni.worth.serialization.json.JSONDumper;
 import net.woggioni.worth.traversal.ValueIdentity;
 import net.woggioni.worth.utils.Leb128;
-import net.woggioni.worth.utils.WorthUtils;
 import net.woggioni.worth.value.ArrayValue;
 import net.woggioni.worth.value.ObjectValue;
 import net.woggioni.worth.xface.Dumper;
@@ -76,7 +74,7 @@ public class JBONDumper extends ValueDumper {
                     stringValue(v.asString());
                     break;
                 case ARRAY:
-                    ArrayValue arrayValue = WorthUtils.dynamicCast(v, ArrayValue.class);
+                    ArrayValue arrayValue = (ArrayValue) v;
                     if(ids != null && (id = ids.get(new ValueIdentity(arrayValue))) != null) {
                         if(dumpedId.add(id)) {
                             stack.push(new ArrayStackLevel(arrayValue));
@@ -91,17 +89,17 @@ public class JBONDumper extends ValueDumper {
                     }
                     break;
                 case OBJECT:
-                    ObjectValue objectValue = WorthUtils.dynamicCast(v, ObjectValue.class);
+                    ObjectValue objectValue = (ObjectValue) v;
                     if(ids != null && (id = ids.get(new ValueIdentity(objectValue))) != null) {
                         if(dumpedId.add(id)) {
-                                stack.push(new ObjectStackLevel(WorthUtils.dynamicCast(v, ObjectValue.class)));
+                                stack.push(new ObjectStackLevel(v));
                                 valueId(id);
                                 beginObject(objectValue.size());
                             } else {
                                 valueReference(id);
                             }
                     } else {
-                        stack.push(new ObjectStackLevel(WorthUtils.dynamicCast(v, ObjectValue.class)));
+                        stack.push(new ObjectStackLevel(v));
                         beginObject(objectValue.size());
                     }
                     break;
@@ -113,14 +111,16 @@ public class JBONDumper extends ValueDumper {
             StackLevel last = stack.getFirst();
             ArrayStackLevel arrayStackLevel;
             ObjectStackLevel objectStackLevel;
-            if ((arrayStackLevel = WorthUtils.dynamicCast(last, ArrayStackLevel.class)) != null) {
+            if (last instanceof ArrayStackLevel) {
+                arrayStackLevel = (ArrayStackLevel) last;
                 if (arrayStackLevel.hasNext()) {
                     handle_value.accept(arrayStackLevel.next());
                 } else {
                     endArray();
                     stack.pop();
                 }
-            } else if ((objectStackLevel = WorthUtils.dynamicCast(last, ObjectStackLevel.class)) != null) {
+            } else if (last instanceof ObjectStackLevel) {
+                objectStackLevel = (ObjectStackLevel) last;
                 if (objectStackLevel.hasNext()) {
                     Map.Entry<String, Value> entry = objectStackLevel.next();
                     objectKey(entry.getKey());

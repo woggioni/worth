@@ -10,9 +10,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static net.woggioni.worth.utils.WorthUtils.dynamicCast;
-import static net.woggioni.worth.utils.WorthUtils.pop;
-import static net.woggioni.worth.utils.WorthUtils.tail;
+import static net.woggioni.jwo.JWO.pop;
+import static net.woggioni.jwo.JWO.tail;
 
 class TraversalContextImpl<T> implements TraversalContext<T> {
     private final List<StackElement<T>> immutableStack;
@@ -29,14 +28,16 @@ class TraversalContextImpl<T> implements TraversalContext<T> {
     @Override
     public String getPath() {
         StringBuilder sb = new StringBuilder();
-        for (StackElement se : immutableStack) {
-            ArrayStackElement ase;
-            ObjectStackElement ose;
-            if ((ase = dynamicCast(se, ArrayStackElement.class)) != null) {
+        for (StackElement<T> se : immutableStack) {
+            ArrayStackElement<T> ase;
+            ObjectStackElement<T> ose;
+            if (se instanceof ArrayStackElement) {
+                ase = (ArrayStackElement<T>) se;
                 sb.append("[");
                 sb.append(ase.getCurrentIndex());
                 sb.append("]");
-            } else if ((ose = dynamicCast(se, ObjectStackElement.class)) != null) {
+            } else if (se instanceof ObjectStackElement) {
+                ose = (ObjectStackElement<T>) se;
                 sb.append("[\"");
                 sb.append(ose.getCurrentKey());
                 sb.append("\"]");
@@ -119,12 +120,12 @@ public class ValueWalker {
     private static <T> AbstractStackElement<T> nextChildStackElement(StackElement<T> parent) {
         AbstractStackElement<T> result = null;
         if (parent instanceof ArrayStackElement) {
-            ArrayStackElement ase = (ArrayStackElement) parent;
+            ArrayStackElement<T> ase = (ArrayStackElement<T>) parent;
             if (ase.hasNext()) {
                 result = stackElementFromValue(ase.next());
             }
         } else if (parent instanceof ObjectStackElement) {
-            ObjectStackElement ose = (ObjectStackElement) parent;
+            ObjectStackElement<T> ose = (ObjectStackElement<T>) parent;
             if (ose.hasNext()) {
                 result = stackElementFromValue(ose.next());
             }

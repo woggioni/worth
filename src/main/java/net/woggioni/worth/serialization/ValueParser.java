@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import net.woggioni.worth.exception.MaxDepthExceededException;
 import net.woggioni.worth.exception.NotImplementedException;
 import net.woggioni.worth.exception.ParseException;
-import net.woggioni.worth.utils.WorthUtils;
 import net.woggioni.worth.value.ArrayValue;
 import net.woggioni.worth.value.BooleanValue;
 import net.woggioni.worth.value.FloatValue;
@@ -23,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import static net.woggioni.worth.utils.WorthUtils.newThrowable;
+import static net.woggioni.jwo.JWO.newThrowable;
 
 public class ValueParser implements Parser {
 
@@ -56,9 +55,11 @@ public class ValueParser implements Parser {
         StackLevel last = stack.getFirst();
         ArrayStackLevel asl;
         ObjectStackLevel osl;
-        if ((asl = WorthUtils.dynamicCast(last, ArrayStackLevel.class)) != null)
+        if (last instanceof ArrayStackLevel) {
+            asl = (ArrayStackLevel) last;
             asl.value.add(value);
-        else if ((osl = WorthUtils.dynamicCast(last, ObjectStackLevel.class)) != null) {
+        } else if (last instanceof ObjectStackLevel) {
+            osl = (ObjectStackLevel) last;
             osl.value.put(osl.currentKey, value);
             osl.currentKey = null;
         }
@@ -73,7 +74,7 @@ public class ValueParser implements Parser {
         if (cfg.serializeReferences) {
             idMap = new HashMap<>();
         }
-        stack = new ArrayDeque<>() {
+        stack = new ArrayDeque<StackLevel>() {
             @Override
             public void push(StackLevel stackLevel) {
                 if (size() == cfg.maxDepth) {

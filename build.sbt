@@ -18,6 +18,7 @@ git.useGitDescribe := true
 //javaOptions in Test += "-Xmx14G"
 //scalafmtOnCompile := true
 libraryDependencies += "org.projectlombok" % "lombok" % "1.18.8" % Provided
+libraryDependencies += "net.woggioni" % "jwo" % "1.0" % Compile
 
 val testDependencies = Seq("com.novocode" % "junit-interface" % "0.11" % Test,
                            "com.fasterxml.jackson.core" % "jackson-databind" % "2.9.6" % Test,

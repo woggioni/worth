@@ -1,11 +1,12 @@
 package net.woggioni.worth.traversal;
 
 import lombok.SneakyThrows;
+import net.woggioni.jwo.JWO;
 import net.woggioni.worth.serialization.json.JSONParser;
 import net.woggioni.worth.serialization.json.JSONTest;
 import net.woggioni.worth.utils.Tuple2;
-import net.woggioni.worth.utils.WorthUtils;
-import net.woggioni.worth.value.*;
+import net.woggioni.worth.value.ArrayValue;
+import net.woggioni.worth.value.ObjectValue;
 import net.woggioni.worth.xface.Parser;
 import net.woggioni.worth.xface.Value;
 import org.junit.Assert;
@@ -41,14 +42,14 @@ public class ValueWalkerTest {
 
         @Override
         public boolean visitPre(TraversalContext<Void> ctx) {
-            Value value = WorthUtils.tail(ctx.getStack()).getValue();
+            Value value = JWO.tail(ctx.getStack()).getValue();
             preValues.add(value);
             return true;
         }
 
         @Override
         public void visitPost(TraversalContext<Void> ctx) {
-            Value value = WorthUtils.tail(ctx.getStack()).getValue();
+            Value value = JWO.tail(ctx.getStack()).getValue();
             postValues.add(value);
         }
     }
@@ -57,11 +58,13 @@ public class ValueWalkerTest {
         ObjectValue ov;
         ArrayValue av;
         preResult.add(value);
-        if((av = WorthUtils.dynamicCast(value, ArrayValue.class)) != null) {
+        if(value instanceof ArrayValue) {
+            av = (ArrayValue) value;
             for(Value v : av) {
                 walk(preResult, postResult, v);
             }
-        } else if((ov = WorthUtils.dynamicCast(value, ObjectValue.class)) != null) {
+        } else if(value instanceof ObjectValue) {
+            ov = (ObjectValue) value;
             for(Map.Entry<String, Value> entry : ov) {
                 walk(preResult, postResult, entry.getValue());
             }
