@@ -1,10 +1,10 @@
 package net.woggioni.worth.serialization.binary;
 
 import lombok.SneakyThrows;
+import net.woggioni.jwo.Leb128;
 import net.woggioni.worth.exception.NotImplementedException;
 import net.woggioni.worth.serialization.ValueDumper;
 import net.woggioni.worth.traversal.ValueIdentity;
-import net.woggioni.worth.utils.Leb128;
 import net.woggioni.worth.value.ArrayValue;
 import net.woggioni.worth.value.ObjectValue;
 import net.woggioni.worth.xface.Dumper;

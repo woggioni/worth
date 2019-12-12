@@ -1,6 +1,6 @@
 package net.woggioni.worth.value;
 
-import net.woggioni.worth.utils.Tuple2;
+import net.woggioni.jwo.tuple.Tuple2;
 import net.woggioni.worth.xface.Value;
 import org.junit.Assert;
 import org.junit.Test;

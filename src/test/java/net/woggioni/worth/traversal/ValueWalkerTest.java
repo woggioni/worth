@@ -4,7 +4,7 @@ import lombok.SneakyThrows;
 import net.woggioni.jwo.JWO;
 import net.woggioni.worth.serialization.json.JSONParser;
 import net.woggioni.worth.serialization.json.JSONTest;
-import net.woggioni.worth.utils.Tuple2;
+import net.woggioni.jwo.tuple.Tuple2;
 import net.woggioni.worth.value.ArrayValue;
 import net.woggioni.worth.value.ObjectValue;
 import net.woggioni.worth.xface.Parser;

@@ -7,7 +7,7 @@ import net.woggioni.worth.antlr.JSONLexer;
 import net.woggioni.worth.antlr.JSONListenerImpl;
 import net.woggioni.worth.serialization.binary.JBONParser;
 import net.woggioni.worth.serialization.json.JSONParser;
-import net.woggioni.worth.utils.Chronometer;
+import net.woggioni.jwo.Chronometer;
 import net.woggioni.worth.value.ObjectValue;
 import net.woggioni.worth.xface.Value;
 import org.antlr.v4.runtime.CharStream;
@@ -57,7 +57,7 @@ public class Main {
                     JsonNode jsonNode = om.readTree(smallTestData());
                 }
             }
-            jacksonTime = chr.stop(Chronometer.TimeUnit.MILLISECOND);
+            jacksonTime = chr.elapsed(Chronometer.UnitOfMeasure.MILLISECONDS);
             System.out.printf("Jackson time: %8s msec\n", String.format("%.3f", jacksonTime));
         }
         {
@@ -67,7 +67,7 @@ public class Main {
                     Value value = new JSONParser().parse(new BufferedReader(new InputStreamReader(smallTestData())));
                 }
             }
-            worthTime = chr.stop(Chronometer.TimeUnit.MILLISECOND);
+            worthTime = chr.elapsed(Chronometer.UnitOfMeasure.MILLISECONDS);
             System.out.printf("Worth time:   %8s msec\n", String.format("%.3f", worthTime));
         }
         {
@@ -83,7 +83,7 @@ public class Main {
                     walker.walk(listener, parser.json());
                 }
             }
-            antlrTime = chr.stop(Chronometer.TimeUnit.MILLISECOND);
+            antlrTime = chr.elapsed(Chronometer.UnitOfMeasure.MILLISECONDS);
             System.out.printf("Antlr time:   %8s msec\n", String.format("%.3f", antlrTime));
         }
     }
@@ -101,7 +101,7 @@ public class Main {
             chr.reset();
             ObjectMapper om = new ObjectMapper();
             om.readTree(new InputStreamReader(is));
-            double elapsedTime = chr.stop(Chronometer.TimeUnit.SECOND);
+            double elapsedTime = chr.elapsed(Chronometer.UnitOfMeasure.SECONDS);
             System.out.printf("Jackson time: %8s sec\n", String.format("%.3f", elapsedTime));
         }
     }
@@ -112,7 +112,7 @@ public class Main {
         try (InputStream is = extractTestData()) {
             chr.reset();
             new JSONParser(buildConfiguration()).parse(is);
-            double elapsedTime = chr.stop(Chronometer.TimeUnit.SECOND);
+            double elapsedTime = chr.elapsed(Chronometer.UnitOfMeasure.SECONDS);
             System.out.printf("Worth json time:   %8s sec\n", String.format("%.3f", elapsedTime));
         }
     }
@@ -123,7 +123,7 @@ public class Main {
         try (InputStream is = extractBinaryTestData()) {
             chr.reset();
             new JBONParser(buildConfiguration()).parse(is);
-            double elapsedTime = chr.stop(Chronometer.TimeUnit.SECOND);
+            double elapsedTime = chr.elapsed(Chronometer.UnitOfMeasure.SECONDS);
             System.out.printf("Worth jbon time:   %8s sec\n", String.format("%.3f", elapsedTime));
         }
     }
@@ -140,7 +140,7 @@ public class Main {
             JSONListenerImpl listener = new JSONListenerImpl();
             ParseTreeWalker walker = new ParseTreeWalker();
             walker.walk(listener, parser.json());
-            double elapsedTime = chr.stop(Chronometer.TimeUnit.SECOND);
+            double elapsedTime = chr.elapsed(Chronometer.UnitOfMeasure.SECONDS);
             System.out.printf("Antlr time:   %8s sec\n", String.format("%.3f", elapsedTime));
         }
     }

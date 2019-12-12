@@ -1,11 +1,10 @@
 package net.woggioni.worth.serialization.binary;
 
 import lombok.SneakyThrows;
+import net.woggioni.jwo.Leb128;
 import net.woggioni.worth.buffer.LookAheadInputStream;
 import net.woggioni.worth.exception.ParseException;
 import net.woggioni.worth.serialization.ValueParser;
-import net.woggioni.worth.utils.Leb128;
-import net.woggioni.worth.utils.WorthUtils;
 import net.woggioni.worth.xface.Parser;
 import net.woggioni.worth.xface.Value;
 
