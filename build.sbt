@@ -2,8 +2,14 @@ name := "worth"
 
 organization := "net.woggioni"
 
+maintainer := "oggioni.walter@gmail.com"
+
 version := "1.0"
 resolvers += Resolver.mavenLocal
+
+crossPaths := false
+
+autoScalaLibrary := false
 
 scalacOptions ++= Seq(
     "-unchecked",
