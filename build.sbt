@@ -22,6 +22,7 @@ scalacOptions ++= Seq(
 
 git.useGitDescribe := true
 //javaOptions in Test += "-Xmx14G"
+javacOptions in (Compile, compile) ++= Seq("-target", "8", "-source", "8")
 //scalafmtOnCompile := true
 libraryDependencies += "org.projectlombok" % "lombok" % "1.18.8" % Provided
 libraryDependencies += "net.woggioni" % "jwo" % "1.0" % Compile
