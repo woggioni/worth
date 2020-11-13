@@ -27,6 +27,10 @@ javacOptions in (Compile, compile) ++= Seq("-target", "8", "-source", "8")
 libraryDependencies += "org.projectlombok" % "lombok" % "1.18.8" % Provided
 libraryDependencies += "net.woggioni" % "jwo" % "1.0" % Compile
 
+Compile / packageBin / packageOptions +=
+  Package.ManifestAttributes("Automatic-Module-Name" -> "net.woggioni.worth")
+
+
 val testDependencies = Seq("com.novocode" % "junit-interface" % "0.11" % Test,
                            "com.fasterxml.jackson.core" % "jackson-databind" % "2.9.6" % Test,
                            "org.tukaani" % "xz" % "1.8" % Test)

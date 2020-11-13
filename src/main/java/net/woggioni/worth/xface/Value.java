@@ -18,6 +18,10 @@ public interface Value {
 
     Type type();
 
+    default boolean isNull() {
+        return type() == Value.Null.type();
+    }
+
     default boolean asBoolean() {
         throw new TypeException("Not a boolean");
     }

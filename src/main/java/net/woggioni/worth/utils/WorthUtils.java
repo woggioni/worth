@@ -3,11 +3,23 @@ package net.woggioni.worth.utils;
 import lombok.SneakyThrows;
 import net.woggioni.worth.xface.Value;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class WorthUtils {
-    
+
+    public static Optional<Value> nested(Value root, String... keys) {
+        Value result = root;
+        for (String key : keys) {
+            result = result.get(key);
+            if (result == null) {
+                break;
+            }
+        }
+        return Optional.ofNullable(result);
+    }
+
     public static Value getOrNull(Value root, String... keys) {
         Value result = root;
         for (String key : keys) {
