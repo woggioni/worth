@@ -1,0 +1,23 @@
+plugins {
+    id 'application'
+}
+
+application {
+    mainClassName = 'net.woggioni.wson.benchmark.Main'
+    applicationDefaultJvmArgs = ['-Xmx8G']
+}
+
+run {
+    commandLine
+}
+
+dependencies {
+    implementation rootProject
+    implementation project(':antlr')
+    implementation group: "net.woggioni", name: "jwo", version: getProperty('version.jwo')
+    implementation group: 'org.tukaani', name: 'xz', version: getProperty('version.xz')
+    implementation group: 'com.beust', name: 'jcommander', version: getProperty('version.jcommander')
+    implementation group: "com.fasterxml.jackson.core", name:  "jackson-databind", version: getProperty('version.jackson')
+
+    runtimeOnly project(':test-utils')
+}

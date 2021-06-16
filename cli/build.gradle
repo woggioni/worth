@@ -1,0 +1,15 @@
+plugins {
+    id 'application'
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+dependencies {
+    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: getProperty('version.kotlin')
+    implementation group: 'com.beust', name: 'jcommander', version: getProperty('version.jcommander')
+    implementation group: "org.slf4j", name: "slf4j-simple", version: getProperty('version.slf4j')
+    implementation rootProject
+}
+
+application {
+    mainClassName = 'net.woggioni.wson.cli.MainKt'
+}

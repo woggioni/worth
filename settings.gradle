@@ -1,0 +1,17 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+    }
+
+    plugins {
+        id 'org.jetbrains.kotlin.jvm' version getProperty('version.kotlin')
+    }
+}
+
+rootProject.name = 'wson'
+
+def includeDirs = ['antlr', 'benchmark', 'test-utils', 'cli']
+
+includeDirs.each {
+    include(it)
+}

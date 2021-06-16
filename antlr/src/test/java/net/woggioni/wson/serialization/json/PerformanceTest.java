@@ -55,7 +55,7 @@ public class PerformanceTest {
     @Test
     @SneakyThrows
     public void loopTest() {
-        double jacksonTime, worthTime, antlrTime;
+        double jacksonTime, wsonTime, antlrTime;
         final int loops = 100;
         Chronometer chr = new Chronometer();
         {
@@ -76,8 +76,8 @@ public class PerformanceTest {
                     Value value = new JSONParser().parse(smallTestData());
                 }
             }
-            worthTime = chr.elapsed(Chronometer.UnitOfMeasure.MILLISECONDS);
-            System.out.printf("Worth time:   %8s msec\n", String.format("%.3f", worthTime));
+            wsonTime = chr.elapsed(Chronometer.UnitOfMeasure.MILLISECONDS);
+            System.out.printf("Worth time:   %8s msec\n", String.format("%.3f", wsonTime));
         }
         {
             for(int j = 0; j < 2; j++) {

@@ -1,0 +1,79 @@
+plugins {
+    id 'maven-publish'
+}
+
+allprojects {
+    apply plugin: 'java-library'
+    group = "net.woggioni"
+    version = getProperty('version.wson')
+
+    repositories {
+        maven {
+            url = "https://woggioni.net/mvn/"
+        }
+        mavenCentral()
+    }
+
+    dependencies {
+        ['', 'test'].each {sourceSetName ->
+            ['compileOnly', 'annotationProcessor'].each { configurationSuffix ->
+                String configurationName
+                if(sourceSetName) configurationName = sourceSetName + configurationSuffix.capitalize()
+                else configurationName = configurationSuffix
+                add(configurationName,  [group: "org.projectlombok", name: "lombok", version: getProperty('version.lombok')])
+            }
+        }
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: getProperty('version.junit.jupiter')
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: getProperty('version.junit.jupiter')
+        testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: getProperty('version.junit.jupiter')
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}
+
+subprojects {
+    tasks.named('jar', Jar) {
+        archiveBaseName = "wson-${project.name}"
+    }
+}
+
+dependencies {
+    implementation group: "net.woggioni", name: "jwo", version: getProperty('version.jwo')
+    implementation group: "org.slf4j", name: "slf4j-api", version: getProperty('version.slf4j')
+
+    testImplementation project('test-utils')
+    testImplementation group: "com.fasterxml.jackson.core", name:  "jackson-databind", version: getProperty('version.jackson')
+}
+
+compileJava {
+    options.release = 8
+}
+
+jar {
+    manifest{
+        attributes([
+            "Automatic-Module-Name": "net.woggioni.wson"
+        ])
+    }
+}
+
+wrapper {
+    distributionType = Wrapper.DistributionType.BIN
+    gradleVersion = "7.0.2"
+}
+
+
+publishing {
+    repositories {
+        maven {
+            url = "https://mvn.woggioni.net/"
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+            from(components["java"])
+        }
+    }
+}
