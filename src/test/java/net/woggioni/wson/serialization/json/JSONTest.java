@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import lombok.SneakyThrows;
-import net.woggioni.wson.buffer.LookAheadTextInputStream;
+import net.woggioni.jwo.LookAheadTextInputStream;
 import net.woggioni.wson.exception.NotImplementedException;
 import net.woggioni.wson.value.ArrayValue;
 import net.woggioni.wson.value.ObjectValue;

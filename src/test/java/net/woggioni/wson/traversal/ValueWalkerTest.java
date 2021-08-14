@@ -2,9 +2,9 @@ package net.woggioni.wson.traversal;
 
 import lombok.SneakyThrows;
 import net.woggioni.jwo.JWO;
+import net.woggioni.jwo.Tuple2;
 import net.woggioni.wson.serialization.json.JSONParser;
 import net.woggioni.wson.serialization.json.JSONTest;
-import net.woggioni.jwo.tuple.Tuple2;
 import net.woggioni.wson.value.ArrayValue;
 import net.woggioni.wson.value.ObjectValue;
 import net.woggioni.wson.xface.Parser;

@@ -1,11 +1,18 @@
 plugins {
     id 'maven-publish'
+    id 'net.woggioni.gradle.lombok' apply false
 }
 
 allprojects {
     apply plugin: 'java-library'
+    apply plugin: 'net.woggioni.gradle.lombok'
+
     group = "net.woggioni"
     version = getProperty('version.wson')
+
+    lombok {
+        version = getProperty('version.lombok')
+    }
 
     repositories {
         maven {
@@ -47,21 +54,14 @@ dependencies {
     testImplementation group: "com.fasterxml.jackson.core", name:  "jackson-databind", version: getProperty('version.jackson')
 }
 
-compileJava {
-    options.release = 8
-}
-
-jar {
-    manifest{
-        attributes([
-            "Automatic-Module-Name": "net.woggioni.wson"
-        ])
-    }
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 wrapper {
     distributionType = Wrapper.DistributionType.BIN
-    gradleVersion = "7.0.2"
+    gradleVersion = getProperty("version.gradle")
 }
 
 

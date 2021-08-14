@@ -1,9 +1,15 @@
 pluginManagement {
     repositories {
+        mavenLocal()
         gradlePluginPortal()
+        maven {
+            url = 'https://woggioni.net/mvn/'
+        }
     }
 
     plugins {
+        id "net.woggioni.gradle.executable.jar" version "0.1"
+        id "net.woggioni.gradle.lombok" version "0.1"
         id 'org.jetbrains.kotlin.jvm' version getProperty('version.kotlin')
     }
 }

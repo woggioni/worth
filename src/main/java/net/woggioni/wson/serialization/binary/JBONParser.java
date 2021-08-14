@@ -2,7 +2,7 @@ package net.woggioni.wson.serialization.binary;
 
 import lombok.SneakyThrows;
 import net.woggioni.jwo.Leb128;
-import net.woggioni.wson.buffer.LookAheadInputStream;
+import net.woggioni.jwo.LookAheadInputStream;
 import net.woggioni.wson.exception.ParseException;
 import net.woggioni.wson.serialization.ValueParser;
 import net.woggioni.wson.xface.Parser;

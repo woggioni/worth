@@ -1,6 +1,6 @@
 package net.woggioni.wson.value;
 
-import net.woggioni.jwo.tuple.Tuple2;
+import net.woggioni.jwo.Tuple2;
 import net.woggioni.wson.xface.Value;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

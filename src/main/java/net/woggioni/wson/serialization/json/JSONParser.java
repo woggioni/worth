@@ -1,7 +1,7 @@
 package net.woggioni.wson.serialization.json;
 
 import lombok.SneakyThrows;
-import net.woggioni.wson.buffer.LookAheadTextInputStream;
+import net.woggioni.jwo.LookAheadTextInputStream;
 import net.woggioni.wson.exception.IOException;
 import net.woggioni.wson.exception.NotImplementedException;
 import net.woggioni.wson.exception.ParseException;
