@@ -8,7 +8,7 @@ pluginManagement {
     }
 
     plugins {
-        id "net.woggioni.gradle.executable.jar" version "0.1"
+        id "net.woggioni.gradle.envelope" version "0.1"
         id "net.woggioni.gradle.lombok" version "0.1"
         id 'org.jetbrains.kotlin.jvm' version getProperty('version.kotlin')
     }
@@ -16,7 +16,7 @@ pluginManagement {
 
 rootProject.name = 'wson'
 
-def includeDirs = ['antlr', 'benchmark', 'test-utils', 'cli']
+def includeDirs = ['antlr', 'benchmark', 'test-utils', 'wson-cli']
 
 includeDirs.each {
     include(it)

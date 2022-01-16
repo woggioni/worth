@@ -1,5 +1,6 @@
 plugins {
-    id 'application'
+    id 'maven-publish'
+    id 'net.woggioni.gradle.envelope'
     id 'org.jetbrains.kotlin.jvm'
 }
 
@@ -10,13 +11,26 @@ dependencies {
     implementation rootProject
 }
 
-application {
-    mainClassName = 'net.woggioni.wson.cli.MainKt'
+envelopeJar {
+    mainClass = 'net.woggioni.wson.cli.MainKt'
 }
 
 
 compileKotlin {
     kotlinOptions.with {
         jvmTarget = '1.8'
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            url = "https://mvn.woggioni.net/"
+        }
+    }
+    publications {
+        myDistribution(MavenPublication) {
+            artifact envelopeJar
+        }
     }
 }
