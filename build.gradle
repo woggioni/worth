@@ -59,6 +59,11 @@ java {
     withSourcesJar()
 }
 
+compileJava {
+    options.release = 8
+    options.compilerArgs << '-parameters'
+}
+
 wrapper {
     distributionType = Wrapper.DistributionType.BIN
     gradleVersion = getProperty("version.gradle")

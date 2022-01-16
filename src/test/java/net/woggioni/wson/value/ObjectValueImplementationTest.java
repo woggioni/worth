@@ -12,10 +12,10 @@ public class ObjectValueImplementationTest {
 
     private static List<Tuple2<ObjectValue.Implementation, Class<? extends ObjectValue>>> getImplementationMapping() {
         return Arrays.asList(
-            new Tuple2<>(ObjectValue.Implementation.ArrayList, ListObjectValue.class),
-            new Tuple2<>(ObjectValue.Implementation.TreeMap, TreeMapObjectValue.class),
-            new Tuple2<>(ObjectValue.Implementation.HashMap, HashMapObjectValue.class),
-            new Tuple2<>(ObjectValue.Implementation.LinkedHashMap, LinkedHashMapObjectValue.class)
+            Tuple2.newInstance(ObjectValue.Implementation.ArrayList, ListObjectValue.class),
+            Tuple2.newInstance(ObjectValue.Implementation.TreeMap, TreeMapObjectValue.class),
+            Tuple2.newInstance(ObjectValue.Implementation.HashMap, HashMapObjectValue.class),
+            Tuple2.newInstance(ObjectValue.Implementation.LinkedHashMap, LinkedHashMapObjectValue.class)
         );
     }
 
@@ -26,15 +26,15 @@ public class ObjectValueImplementationTest {
         ObjectValue.Implementation expectedImplementation =
             ObjectValue.Implementation.valueOf(System.getProperty(ObjectValue.class.getName() + ".implementation", "TreeMap"));
         Class<? extends ObjectValue> expectedClass =
-            mapping.stream().filter(t -> t._1 == expectedImplementation).findFirst().get()._2;
+            mapping.stream().filter(t -> t.get_1() == expectedImplementation).findFirst().get().get_2();
         ObjectValue obj = ObjectValue.newInstance();
         Assertions.assertEquals(expectedClass, obj.getClass());
         mapping.forEach(tuple -> {
             Value.Configuration cfg = Value.Configuration.builder()
-                    .objectValueImplementation(tuple._1)
+                    .objectValueImplementation(tuple.get_1())
                     .build();
             ObjectValue obj2 = ObjectValue.newInstance(cfg);
-            Assertions.assertEquals(tuple._2, obj2.getClass());
+            Assertions.assertEquals(tuple.get_2(), obj2.getClass());
         });
     }
 

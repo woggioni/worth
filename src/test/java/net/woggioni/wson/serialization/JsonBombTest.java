@@ -8,10 +8,12 @@ import net.woggioni.wson.test.JsonBomb;
 import net.woggioni.wson.xface.Parser;
 import net.woggioni.wson.xface.Value;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class JsonBombTest {
     @Test
+    @Disabled
     @SneakyThrows
     public void jackson() {
         ObjectMapper om = new ObjectMapper();

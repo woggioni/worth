@@ -76,7 +76,7 @@ public class ValueWalkerTest {
         List<Value> preResult = new ArrayList<>();
         List<Value> postResult = new ArrayList<>();
         walk(preResult, postResult, root);
-        return new Tuple2<>(preResult, postResult);
+        return Tuple2.newInstance(preResult, postResult);
     }
 
     @Test
@@ -86,6 +86,6 @@ public class ValueWalkerTest {
         ValueWalker.walk(v, visitor);
         Assertions.assertFalse(visitor.preValues.isEmpty());
         Assertions.assertFalse(visitor.postValues.isEmpty());
-        Assertions.assertEquals(recursiveWalk(v), new Tuple2<>(visitor.preValues, visitor.postValues));
+        Assertions.assertEquals(recursiveWalk(v), Tuple2.newInstance(visitor.preValues, visitor.postValues));
     }
 }

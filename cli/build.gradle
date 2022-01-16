@@ -13,3 +13,10 @@ dependencies {
 application {
     mainClassName = 'net.woggioni.wson.cli.MainKt'
 }
+
+
+compileKotlin {
+    kotlinOptions.with {
+        jvmTarget = '1.8'
+    }
+}
