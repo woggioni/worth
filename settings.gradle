@@ -8,8 +8,9 @@ pluginManagement {
     }
 
     plugins {
-        id "net.woggioni.gradle.envelope" version "0.1"
-        id "net.woggioni.gradle.lombok" version "0.1"
+        id 'net.woggioni.gradle.envelope' version "0.1"
+        id 'net.woggioni.gradle.lombok' version "0.1"
+        id 'net.woggioni.gradle.multi-release-jar' version getProperty('version.multiReleaseJarPlugin')
         id 'org.jetbrains.kotlin.jvm' version getProperty('version.kotlin')
     }
 }

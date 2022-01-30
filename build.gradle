@@ -1,6 +1,7 @@
 plugins {
     id 'maven-publish'
     id 'net.woggioni.gradle.lombok' apply false
+    id 'net.woggioni.gradle.multi-release-jar'
 }
 
 allprojects {
