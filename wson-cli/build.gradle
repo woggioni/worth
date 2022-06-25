@@ -5,9 +5,9 @@ plugins {
 }
 
 dependencies {
-    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: getProperty('version.kotlin')
-    implementation group: 'com.beust', name: 'jcommander', version: getProperty('version.jcommander')
-    implementation group: "org.slf4j", name: "slf4j-simple", version: getProperty('version.slf4j')
+    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: getProperty('kotlin.version')
+    implementation group: 'com.beust', name: 'jcommander'
+    implementation group: "org.slf4j", name: "slf4j-simple"
     implementation rootProject
 }
 

@@ -1,17 +1,22 @@
 pluginManagement {
     repositories {
-        mavenLocal()
-        gradlePluginPortal()
         maven {
             url = 'https://woggioni.net/mvn/'
+            content {
+                includeGroup 'net.woggioni.gradle'
+                includeGroup 'net.woggioni.gradle.lombok'
+                includeGroup 'net.woggioni.gradle.envelope'
+                includeGroup 'net.woggioni.gradle.multi-release-jar'
+            }
         }
+        gradlePluginPortal()
     }
 
     plugins {
-        id 'net.woggioni.gradle.envelope' version "0.1"
-        id 'net.woggioni.gradle.lombok' version "0.1"
-        id 'net.woggioni.gradle.multi-release-jar' version getProperty('version.multiReleaseJarPlugin')
-        id 'org.jetbrains.kotlin.jvm' version getProperty('version.kotlin')
+        id 'net.woggioni.gradle.envelope' version getProperty('net.woggioni.gradle.envelope.version')
+        id 'net.woggioni.gradle.lombok' version getProperty('net.woggioni.gradle.lombok.version')
+        id 'net.woggioni.gradle.multi-release-jar' version getProperty('net.woggioni.gradle.multi-release-jar')
+        id 'org.jetbrains.kotlin.jvm' version getProperty('kotlin.version')
     }
 }
 

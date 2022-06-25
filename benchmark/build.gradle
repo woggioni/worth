@@ -14,10 +14,10 @@ run {
 dependencies {
     implementation rootProject
     implementation project(':antlr')
-    implementation group: "net.woggioni", name: "jwo", version: getProperty('version.jwo')
-    implementation group: 'org.tukaani', name: 'xz', version: getProperty('version.xz')
-    implementation group: 'com.beust', name: 'jcommander', version: getProperty('version.jcommander')
-    implementation group: "com.fasterxml.jackson.core", name:  "jackson-databind", version: getProperty('version.jackson')
+    implementation group: "net.woggioni", name: "jwo"
+    implementation group: 'org.tukaani', name: 'xz'
+    implementation group: 'com.beust', name: 'jcommander'
+    implementation group: "com.fasterxml.jackson.core", name: "jackson-databind"
 
     runtimeOnly project(':test-utils')
 }

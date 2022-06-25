@@ -9,31 +9,30 @@ allprojects {
     apply plugin: 'net.woggioni.gradle.lombok'
 
     group = "net.woggioni"
-    version = getProperty('version.wson')
+    version = getProperty('wson.version')
 
     lombok {
-        version = getProperty('version.lombok')
+        version = getProperty('lombok.version')
     }
 
     repositories {
         maven {
             url = "https://woggioni.net/mvn/"
+            content {
+                includeGroup 'net.woggioni'
+                includeGroup 'com.lys'
+            }
         }
         mavenCentral()
     }
 
     dependencies {
-        ['', 'test'].each {sourceSetName ->
-            ['compileOnly', 'annotationProcessor'].each { configurationSuffix ->
-                String configurationName
-                if(sourceSetName) configurationName = sourceSetName + configurationSuffix.capitalize()
-                else configurationName = configurationSuffix
-                add(configurationName,  [group: "org.projectlombok", name: "lombok", version: getProperty('version.lombok')])
-            }
-        }
-        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: getProperty('version.junit.jupiter')
-        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: getProperty('version.junit.jupiter')
-        testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: getProperty('version.junit.jupiter')
+        implementation platform(group: 'com.lys', name: 'lys-dependencies', version: getProperty('lys.version'))
+        implementation group: "org.tukaani", name: "xz"
+
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api'
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params'
+        testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine'
     }
 
     test {
@@ -41,18 +40,12 @@ allprojects {
     }
 }
 
-subprojects {
-    tasks.named('jar', Jar) {
-        archiveBaseName = "wson-${project.name}"
-    }
-}
-
 dependencies {
-    implementation group: "net.woggioni", name: "jwo", version: getProperty('version.jwo')
-    implementation group: "org.slf4j", name: "slf4j-api", version: getProperty('version.slf4j')
+    implementation group: "net.woggioni", name: "jwo"
+    implementation group: "org.slf4j", name: "slf4j-api"
 
     testImplementation project('test-utils')
-    testImplementation group: "com.fasterxml.jackson.core", name:  "jackson-databind", version: getProperty('version.jackson')
+    testImplementation group: "com.fasterxml.jackson.core", name:  "jackson-databind"
 }
 
 java {
@@ -67,7 +60,7 @@ compileJava {
 
 wrapper {
     distributionType = Wrapper.DistributionType.BIN
-    gradleVersion = getProperty("version.gradle")
+    gradleVersion = getProperty("gradle.version")
 }
 
 

@@ -5,12 +5,14 @@ plugins {
 dependencies {
     implementation rootProject
 
-    testImplementation group: "net.woggioni", name: "jwo", version: getProperty('version.jwo')
+    testImplementation group: "net.woggioni", name: "jwo"
     testImplementation project(':test-utils')
-    testImplementation group: "com.fasterxml.jackson.core", name:"jackson-databind", version: getProperty('version.jackson')
-    testImplementation group: "org.tukaani", name: "xz", version: getProperty('version.xz')
-    antlr group: "org.antlr", name: "antlr4", version: getProperty('version.antlr')
-    antlr group: "org.antlr", name: "antlr4-runtime", version: getProperty('version.antlr')
+    testImplementation group: "com.fasterxml.jackson.core", name: "jackson-databind"
+    testImplementation group: "org.tukaani", name: "xz"
+
+    antlr platform(group: 'com.lys', name: 'lys-dependencies', version: getProperty('lys.version'))
+    antlr group: "org.antlr", name: "antlr4"
+    antlr group: "org.antlr", name: "antlr4-runtime"
 }
 
 generateGrammarSource {
