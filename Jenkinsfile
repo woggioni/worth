@@ -6,7 +6,7 @@ pipeline {
     stages {
         stage("Build") {
             steps {
-                sh "./gradlew clean build"
+                sh "./gradlew clean assemble build"
                 junit testResults: "build/test-results/test/*.xml"
                 javadoc javadocDir: "build/docs/javadoc", keepAll: true
                 archiveArtifacts artifacts: 'build/libs/*.jar,benchmark/build/libs/*.jar,wson-cli/build/distributions/wson-cli-envelope-*.jar',

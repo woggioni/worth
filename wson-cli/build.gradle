@@ -2,10 +2,15 @@ plugins {
     id 'maven-publish'
     id 'net.woggioni.gradle.envelope'
     id 'org.jetbrains.kotlin.jvm'
+    id 'net.woggioni.gradle.multi-release-jar'
+}
+
+ext {
+    setProperty('jpms.module.name', 'net.woggioni.wson.cli')
 }
 
 dependencies {
-    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: getProperty('kotlin.version')
+    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-jdk8', version: getProperty('kotlin.version')
     implementation group: 'com.beust', name: 'jcommander'
     implementation group: "org.slf4j", name: "slf4j-simple"
     implementation rootProject
@@ -13,8 +18,12 @@ dependencies {
 
 envelopeJar {
     mainClass = 'net.woggioni.wson.cli.MainKt'
+    mainModule = 'net.woggioni.wson.cli'
 }
 
+java {
+    modularity.inferModulePath = true
+}
 
 compileKotlin {
     kotlinOptions.with {
@@ -32,5 +41,11 @@ publishing {
         myDistribution(MavenPublication) {
             artifact envelopeJar
         }
+    }
+}
+
+tasks.register('listConfigurations') {
+    configurations.each {
+        println(it.name)
     }
 }

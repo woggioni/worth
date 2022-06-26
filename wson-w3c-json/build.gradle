@@ -1,0 +1,9 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    implementation rootProject
+    implementation group: 'jakarta.json', name: 'jakarta.json-api', version: '2.1.0'
+    implementation group: "net.woggioni", name: "jwo"
+}

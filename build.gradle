@@ -19,8 +19,9 @@ allprojects {
         maven {
             url = "https://woggioni.net/mvn/"
             content {
-                includeGroup 'net.woggioni'
+                includeGroup 'com.beust'
                 includeGroup 'com.lys'
+                includeGroup 'net.woggioni'
             }
         }
         mavenCentral()
@@ -38,6 +39,14 @@ allprojects {
     test {
         useJUnitPlatform()
     }
+
+    java {
+        modularity.inferModulePath = true
+    }
+}
+
+ext {
+    setProperty('jpms.module.name', 'net.woggioni.wson')
 }
 
 dependencies {
@@ -54,7 +63,6 @@ java {
 }
 
 compileJava {
-    options.release = 8
     options.compilerArgs << '-parameters'
 }
 

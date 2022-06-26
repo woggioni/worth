@@ -13,16 +13,16 @@ pluginManagement {
     }
 
     plugins {
-        id 'net.woggioni.gradle.envelope' version getProperty('net.woggioni.gradle.envelope.version')
-        id 'net.woggioni.gradle.lombok' version getProperty('net.woggioni.gradle.lombok.version')
-        id 'net.woggioni.gradle.multi-release-jar' version getProperty('net.woggioni.gradle.multi-release-jar')
+        id 'net.woggioni.gradle.envelope' version getProperty('lys-gradle-plugins.version')
+        id 'net.woggioni.gradle.lombok' version getProperty('lys-gradle-plugins.version')
+        id 'net.woggioni.gradle.multi-release-jar' version getProperty('lys-gradle-plugins.version')
         id 'org.jetbrains.kotlin.jvm' version getProperty('kotlin.version')
     }
 }
 
 rootProject.name = 'wson'
 
-def includeDirs = ['antlr', 'benchmark', 'test-utils', 'wson-cli']
+def includeDirs = ['antlr', 'benchmark', 'test-utils', 'wson-cli', 'wson-w3c-json']
 
 includeDirs.each {
     include(it)
