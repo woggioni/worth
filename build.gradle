@@ -1,18 +1,18 @@
 plugins {
     id 'maven-publish'
-    id 'net.woggioni.gradle.lombok' apply false
-    id 'net.woggioni.gradle.multi-release-jar'
+    alias catalog.plugins.lombok apply false
+    alias catalog.plugins.multi.release.jar
 }
 
 allprojects {
     apply plugin: 'java-library'
-    apply plugin: 'net.woggioni.gradle.lombok'
+    apply plugin: catalog.plugins.lombok.get().pluginId
 
     group = "net.woggioni"
     version = getProperty('wson.version')
 
     lombok {
-        version = getProperty('lombok.version')
+        version = catalog.versions.lombok.get()
     }
 
     repositories {
@@ -28,12 +28,11 @@ allprojects {
     }
 
     dependencies {
-        implementation platform(group: 'com.lys', name: 'lys-dependencies', version: getProperty('lys.version'))
-        implementation group: "org.tukaani", name: "xz"
+        implementation catalog.xz
 
-        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api'
-        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params'
-        testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine'
+        testImplementation catalog.junit.jupiter.api
+        testImplementation catalog.junit.jupiter.params
+        testRuntimeOnly catalog.junit.jupiter.engine
     }
 
     test {
@@ -50,11 +49,11 @@ ext {
 }
 
 dependencies {
-    implementation group: "net.woggioni", name: "jwo"
-    implementation group: "org.slf4j", name: "slf4j-api"
+    implementation catalog.jwo
+    implementation catalog.slf4j.api
 
     testImplementation project('test-utils')
-    testImplementation group: "com.fasterxml.jackson.core", name:  "jackson-databind"
+    testImplementation catalog.jackson.databind
 }
 
 java {

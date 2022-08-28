@@ -14,10 +14,11 @@ run {
 dependencies {
     implementation rootProject
     implementation project(':antlr')
-    implementation group: "net.woggioni", name: "jwo"
-    implementation group: 'org.tukaani', name: 'xz'
-    implementation group: 'com.beust', name: 'jcommander'
-    implementation group: "com.fasterxml.jackson.core", name: "jackson-databind"
+
+    implementation catalog.jwo
+    implementation catalog.xz
+    implementation catalog.jcommander
+    implementation catalog.jackson.databind
 
     runtimeOnly project(':test-utils')
 }

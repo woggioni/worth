@@ -4,6 +4,6 @@ plugins {
 
 dependencies {
     implementation rootProject
-    implementation group: 'jakarta.json', name: 'jakarta.json-api', version: '2.1.0'
-    implementation group: "net.woggioni", name: "jwo"
+    implementation catalog.jakarta.json.api
+    implementation catalog.jwo
 }

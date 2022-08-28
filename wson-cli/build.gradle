@@ -1,8 +1,8 @@
 plugins {
     id 'maven-publish'
-    id 'net.woggioni.gradle.envelope'
-    id 'org.jetbrains.kotlin.jvm'
-    id 'net.woggioni.gradle.multi-release-jar'
+    alias catalog.plugins.envelope
+    alias catalog.plugins.kotlin
+    alias catalog.plugins.multi.release.jar
 }
 
 ext {
@@ -10,9 +10,9 @@ ext {
 }
 
 dependencies {
-    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-jdk8', version: getProperty('kotlin.version')
-    implementation group: 'com.beust', name: 'jcommander'
-    implementation group: "org.slf4j", name: "slf4j-simple"
+    implementation catalog.kotlin.stdlib.jdk8
+    implementation catalog.jcommander
+    implementation catalog.slf4j.simple
     implementation rootProject
 }
 
